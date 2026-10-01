@@ -1,0 +1,63 @@
+paths:
+  raw: data/raw
+  prepared: data/prepared
+  processed: data/processed
+
+sources:
+  package: http://www.sberbank.com/common/img/uploaded/files/pdf/sberindex/hackathonlicence.zip
+  borders: http://www.sberbank.com/common/files/t_dict_municipal.rar
+  population: https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/by_indicator/data_section31_112_v20250918.zip
+  labor: https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/by_indicator/data_section32_112_v20250918.zip
+  prices: https://www.fedstat.ru/indicator/31052
+
+rosstat:
+  employment:
+    archive: labor
+    code: Y48423005
+    years: [2023, 2024]
+    columns: [okved2]
+  wages:
+    archive: labor
+    code: Y48423007
+    years: [2023, 2024]
+    columns: [okved2]
+  population:
+    archive: population
+    code: Y48112027
+    years: [2023, 2024]
+    columns: [mest]
+  age:
+    archive: population
+    code: Y48112014
+    years: [2023, 2024]
+    columns: [vozr]
+    filters:
+      grup_2: [Всего]
+      vozr: [Всего, Моложе трудоспособного возраста, Старше трудоспособного возраста]
+  migration:
+    archive: population
+    code: Y48112023
+    years: [2022, 2023]
+    columns: []
+    filters:
+      migr: [Миграция — всего]
+      grup_2: [Всего]
+      vozr: [Всего]
+
+prices:
+  years: [2022, 2023, 2024]
+  regions:
+    Российская Федерация без учета новых субъектов (с 01.01.2023): Российская Федерация
+    Город Москва столица Российской Федерации город федерального значения: Москва
+    Город Санкт-Петербург город федерального значения: Санкт-Петербург
+    Город федерального значения Севастополь: Севастополь
+    Кемеровская область - Кузбасс: Кемеровская область
+    Ненецкий автономный округ (Архангельская область): Ненецкий автономный округ
+    Республика Адыгея (Адыгея): Республика Адыгея
+    Республика Северная Осетия-Алания: Республика Северная Осетия — Алания
+    Республика Татарстан (Татарстан): Республика Татарстан
+    Ханты-Мансийский автономный округ - Югра (Тюменская область): Ханты-Мансийский автономный округ — Югра
+    Чувашская Республика - Чувашия: Чувашская Республика
+    Ямало-Ненецкий автономный округ (Тюменская область): Ямало-Ненецкий автономный округ
+    Архангельская область (кроме Ненецкого автономного округа): Архангельская область
+    Тюменская область (кроме Ханты-Мансийского автономного округа-Югры и Ямало-Ненецкого автономного округа): Тюменская область
