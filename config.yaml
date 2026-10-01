@@ -2,6 +2,7 @@ paths:
   raw: data/raw
   prepared: data/prepared
   processed: data/processed
+  results: results
 
 sources:
   package: http://www.sberbank.com/common/img/uploaded/files/pdf/sberindex/hackathonlicence.zip
@@ -61,3 +62,22 @@ prices:
     Ямало-Ненецкий автономный округ (Тюменская область): Ямало-Ненецкий автономный округ
     Архангельская область (кроме Ненецкого автономного округа): Архангельская область
     Тюменская область (кроме Ханты-Мансийского автономного округа-Югры и Ямало-Ненецкого автономного округа): Тюменская область
+
+network:
+  cities: merge
+  complete: true
+  attribute_blocks: [spending, labor, place]
+  edge_blocks: [spending]
+  k: 10
+  hybrid_scale_km: 300
+
+compare:
+  period: 2024Q4
+  ks: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  joint_ks: [3, 4, 5, 6, 7, 8, 9, 10]
+  alphas: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+  stable_alphas: [0.0, 0.3, 0.5]
+  subsamples: 5
+  share: 0.9
+  louvain_resolutions: 40
+  seed: 0
