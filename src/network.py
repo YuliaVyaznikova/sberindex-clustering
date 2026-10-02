@@ -19,7 +19,7 @@ EARTH_RADIUS_KM = 6371
 
 def load_data(config):
     processed = config["paths"]["processed"]
-    features = pd.read_parquet(processed / "features.parquet")
+    features = pd.read_parquet(processed / config["network"]["features"])
     territories = pd.read_csv(processed / "territories.csv", index_col=0)
     monthly = pd.read_parquet(processed / "spending_monthly.parquet")
     settings = config["network"]
@@ -30,7 +30,7 @@ def load_data(config):
         features = features[features["territory_id"].map(keep)]
         territories = territories[keep]
     if settings["complete"]:
-        features = features[features["months"] == 3]
+        features = features[features["complete"]]
     return {"features": features, "territories": territories, "monthly": monthly}
 
 
@@ -38,12 +38,12 @@ def merge_cities(features, territories, monthly):
     districts = territories[territories["city_district"]]
     city_of = districts["region"].map(CITIES)
     part = features[features["territory_id"].isin(districts.index)].assign(city=lambda t: t["territory_id"].map(city_of))
-    columns = [c for c in features.columns if c not in ("territory_id", "period", "months")]
+    columns = [c for c in features.columns if c not in ("territory_id", "period", "months", "complete")]
     rows = []
     for (city, period), group in part.groupby(["city", "period"]):
         weight = group["population"]
         row = {c: np.average(group[c], weights=weight) for c in columns}
-        row.update(territory_id=city, period=period, months=group["months"].min())
+        row.update(territory_id=city, period=period, months=group["months"].min(), complete=bool(group["complete"].all()))
         row["population"] = weight.sum()
         row["emp_total"] = group["emp_total"].sum()
         row["emp_rate"] = row["emp_total"] / row["population"]

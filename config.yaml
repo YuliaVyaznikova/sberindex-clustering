@@ -64,6 +64,7 @@ prices:
     Тюменская область (кроме Ханты-Мансийского автономного округа-Югры и Ямало-Ненецкого автономного округа): Тюменская область
 
 network:
+  features: features_rolling.parquet
   cities: merge
   complete: true
   attribute_blocks: [spending, labor, place]
@@ -81,3 +82,12 @@ compare:
   share: 0.9
   louvain_resolutions: 40
   seed: 0
+model:
+  alpha: 0.3
+  k: 6
+
+dynamics:
+  coupling: 1.0
+  couplings: [0.1, 0.3, 1.0, 3.0, 10.0]
+  past_weights: [0.3, 0.5, 0.7, 0.8, 0.9]
+  affect_iterations: 3

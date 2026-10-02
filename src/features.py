@@ -164,19 +164,103 @@ def fill_from_peers(table, columns, territories):
     return table
 
 
-def build_features(config):
-    out = config["paths"]["processed"]
-    out.mkdir(parents=True, exist_ok=True)
-    monthly = load_spending(config)
-    territories, oktmo = load_territories(config, monthly["territory_id"].unique())
+def month_number(date):
+    year, month = map(int, date.split("-"))
+    return 12 * year + month - 1
 
-    table = spending_features(monthly, price_ratio(config, territories))
-    table = table.merge(labor_features(config, oktmo), on=["territory_id", "period"], how="left")
-    table["year"] = table["period"].str[:4]
-    table = table.merge(demography_features(config, oktmo), on=["territory_id", "year"], how="left")
+
+def month_label(number):
+    return f"{number // 12}-{number % 12 + 1:02d}"
+
+
+def windows(monthly):
+    dates = sorted(monthly["date"].unique())
+    first = month_number(dates[0]) + 11
+    ends = [d for d in dates if month_number(d) >= first and int(d[5:]) % 3 == 0]
+    return {f"{d[:4]}Q{int(d[5:]) // 3}": d for d in ends}
+
+
+def rolling_spending(monthly, prices, periods):
+    table = monthly.merge(prices, on=["territory_id", "date"], how="left").dropna(subset=["total", *CATEGORIES.values()])
+    frames = []
+    for period, end in periods.items():
+        last = month_number(end)
+        months = [month_label(m) for m in range(last - 11, last + 1)]
+        grouped = table[table["date"].isin(months)].groupby("territory_id")
+        sums = grouped[["total", *CATEGORIES.values()]].sum()
+        result = pd.DataFrame({f"share_{name}": sums[name] / sums["total"] for name in CATEGORIES.values()})
+        result["share_other"] = 1 - result.sum(axis=1)
+        level = grouped["total"].mean()
+        result["spend_rel"] = np.log(level / level.median())
+        result["price_ratio"] = grouped["price_ratio"].mean()
+        result["spend_real"] = result["spend_rel"] - np.log(result["price_ratio"])
+        result["months"] = grouped.size()
+        frames.append(result.reset_index().assign(period=period))
+    return pd.concat(frames, ignore_index=True)
+
+
+def trailing_year(values, year, quarter):
+    current = values.get((year, quarter))
+    if quarter == 4:
+        return current
+    previous_year, previous_part = values.get((year - 1, 4)), values.get((year - 1, quarter))
+    if current is None or previous_year is None or previous_part is None:
+        return current
+    return (3 * quarter * current + 12 * previous_year - 3 * quarter * previous_part) / 12
+
+
+def rolling_labor(config, oktmo, periods):
+    employment = match(read_prepared(config, "employment.csv.gz"), oktmo, ["period", "okved2"])
+    wages = match(read_prepared(config, "wages.csv.gz"), oktmo, ["period", "okved2"])
+    employment["sector"] = employment["okved2"].str.split().str[1].map(SECTORS)
+    employment.loc[employment["okved2"].str.startswith("Всего"), "sector"] = "total"
+    employment["quarter"] = employment["period"].map(QUARTERS)
+    wages = wages[wages["okved2"].str.startswith("Всего")].assign(quarter=lambda t: t["period"].map(QUARTERS))
+    counts = employment.dropna(subset=["sector"]).groupby(["territory_id", "sector", "year", "quarter"])["value"].sum()
+    wage = wages.set_index(["territory_id", "year", "quarter"])["value"]
+    sectors = list(dict.fromkeys(SECTORS.values()))
+    rows = []
+    for tid, part in counts.groupby(level="territory_id"):
+        series = {sector: group.droplevel(["territory_id", "sector"]).to_dict() for sector, group in part.groupby(level="sector")}
+        total = series.get("total", {})
+        payroll = {key: wage[(tid, *key)] * value for key, value in total.items() if (tid, *key) in wage.index}
+        for period in periods:
+            year, quarter = int(period[:4]), int(period[-1])
+            people = trailing_year(total, year, quarter)
+            if not people or people <= 0:
+                continue
+            row = {"territory_id": tid, "period": period, "emp_total": people}
+            for sector in sectors:
+                value = trailing_year(series.get(sector, {}), year, quarter)
+                row[f"emp_{sector}"] = max(value, 0) / people if value is not None else 0.0
+            pay = trailing_year(payroll, year, quarter)
+            row["wage"] = pay / people if pay is not None and pay > 0 else np.nan
+            rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def rolling_demography(config, oktmo, periods):
+    yearly = demography_features(config, oktmo).set_index(["territory_id", "year"])
+    columns = ["population", "urban_share", "share_young", "share_old"]
+    years = sorted(yearly.index.get_level_values("year").unique())
+    first, second = yearly.xs(years[0], level="year")[columns], yearly.xs(years[-1], level="year")[columns]
+    index = first.index.union(second.index)
+    first, second = first.reindex(index), second.reindex(index)
+    first, second = first.fillna(second), second.fillna(first)
+    migration = yearly["migration"].groupby(level="territory_id").mean().reindex(index)
+    start = month_number(f"{years[0]}-01")
+    frames = []
+    for period, end in periods.items():
+        weight = float(np.clip((month_number(end) - 5.5 - start) / 12, 0, 1))
+        frame = (1 - weight) * first + weight * second
+        frame["migration"] = migration
+        frames.append(frame.reset_index().assign(period=period))
+    return pd.concat(frames, ignore_index=True)
+
+
+def finish(table, territories, config):
     table["market_access"] = table["territory_id"].map(market_access(config, territories))
     table = fill_from_neighbours(table, LABOR + DEMOGRAPHY)
-
     table["wage_rel"] = np.log(table["wage"] / table.groupby("period")["wage"].transform("median"))
     table["wage_real"] = table["wage_rel"] - np.log(table["price_ratio"])
     table["emp_rate"] = table["emp_total"] / table["population"]
@@ -184,10 +268,40 @@ def build_features(config):
     table["log_density"] = np.log(table["population"] / table["territory_id"].map(territories["area_km2"]))
     derived = ["wage_rel", "wage_real", "emp_rate", "log_population", "log_density", "market_access"]
     table = fill_from_peers(table, LABOR + DEMOGRAPHY + derived, territories)
-    table = table.drop(columns="year").sort_values(["territory_id", "period"]).reset_index(drop=True)
+    return table.sort_values(["territory_id", "period"]).reset_index(drop=True)
 
+
+def quarterly_table(config, monthly, territories, oktmo, prices):
+    table = spending_features(monthly, prices)
+    table = table.merge(labor_features(config, oktmo), on=["territory_id", "period"], how="left")
+    table["year"] = table["period"].str[:4]
+    table = table.merge(demography_features(config, oktmo), on=["territory_id", "year"], how="left").drop(columns="year")
+    table["complete"] = table["months"] == 3
+    return finish(table, territories, config)
+
+
+def rolling_table(config, monthly, territories, oktmo, prices):
+    periods = windows(monthly)
+    table = rolling_spending(monthly, prices, periods)
+    table = table.merge(rolling_labor(config, oktmo, periods), on=["territory_id", "period"], how="left")
+    table = table.merge(rolling_demography(config, oktmo, periods), on=["territory_id", "period"], how="left")
+    table["complete"] = table["months"] == 12
+    return finish(table, territories, config)
+
+
+def build_features(config):
+    out = config["paths"]["processed"]
+    out.mkdir(parents=True, exist_ok=True)
+    monthly = load_spending(config)
+    territories, oktmo = load_territories(config, monthly["territory_id"].unique())
+    prices = price_ratio(config, territories)
+    quarterly = quarterly_table(config, monthly, territories, oktmo, prices)
+    rolling = rolling_table(config, monthly, territories, oktmo, prices)
     territories["full_series"] = monthly.dropna().groupby("territory_id").size().reindex(territories.index).eq(24)
-    table.to_parquet(out / "features.parquet", index=False)
+    quarterly.to_parquet(out / "features.parquet", index=False)
+    rolling.to_parquet(out / "features_rolling.parquet", index=False)
     territories.to_csv(out / "territories.csv")
     monthly.to_parquet(out / "spending_monthly.parquet", index=False)
-    print(f"features: {table['territory_id'].nunique()} municipalities, {table['period'].nunique()} quarters, {table.shape[1] - 2} columns")
+    for name, table in [("quarters", quarterly), ("rolling years", rolling)]:
+        complete = table[table["complete"]].groupby("period").size()
+        print(f"features by {name}: {table['territory_id'].nunique()} municipalities, complete per period {complete.to_dict()}")

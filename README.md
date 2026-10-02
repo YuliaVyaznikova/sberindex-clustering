@@ -17,13 +17,15 @@ python -m venv .venv
 python run.py download
 python run.py features
 python run.py compare
+python run.py track
 ```
 
 | Шаг | Что делает | Результат |
 |---|---|---|
 | `download` | скачивает пакет данных конкурса (20 МБ) | `data/raw` |
-| `features` | собирает признаки МО по кварталам | `data/processed` |
+| `features` | собирает признаки МО по кварталам и по скользящему году | `data/processed` |
 | `compare` | сравнивает правила рёбер и методы кластеризации, около 25 минут | `results` |
+| `track` | строит типы МО по окнам и прослеживает их во времени, около 2 минут | `results` |
 
 Таблицы Росстата, цены по регионам и справочник МО уже лежат в `data/prepared`. Чтобы пересобрать их из первоисточников (ещё около 5 ГБ загрузок), есть `python run.py download --all` и `python run.py prepare`, подробности в [docs/data.md](docs/data.md).
 
@@ -34,11 +36,12 @@ python run.py compare
 - [docs/network.md](docs/network.md) построение сети и правило рёбер
 - [docs/methods.md](docs/methods.md) методы кластеризации
 - [docs/metrics.md](docs/metrics.md) метрики качества кластеров
+- [docs/dynamics.md](docs/dynamics.md) отслеживание типов во времени
 
 ## Структура
 
 - `run.py` точка входа
-- `config.yaml` источники данных, показатели Росстата, сопоставление названий регионов, параметры сети и сравнения
+- `config.yaml` источники данных, показатели Росстата, сопоставление названий регионов, параметры сети, модели, сравнения и динамики
 - `src/download.py` загрузка исходных данных
 - `src/prepare.py` подготовка таблиц Росстата, цен и справочника МО
 - `src/features.py` таблица признаков
@@ -47,6 +50,7 @@ python run.py compare
 - `src/methods.py` методы кластеризации
 - `src/metrics.py` метрики качества кластеров
 - `src/compare.py` сравнение правил рёбер и методов
+- `src/dynamics.py` отслеживание типов во времени
 - `data/prepared` подготовленные данные
 - `docs` документация
 
