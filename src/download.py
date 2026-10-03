@@ -7,12 +7,15 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from .api import fetch_dataset
+
 FILES = {
     "package": "hackathonlicence.zip",
     "borders": "t_dict_municipal.rar",
     "population": "rosstat_population.zip",
     "labor": "rosstat_labor.zip",
     "prices": "emiss_31052.xml",
+    "mobility": "indeks-mobilnosti.csv",
 }
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
@@ -98,6 +101,8 @@ def download(config, names):
     for name in names:
         if name == "prices":
             fetch_emiss(config["sources"]["prices"], config["prices"]["years"], raw / FILES["prices"])
+        elif name == "mobility":
+            fetch_dataset(config["sources"]["mobility"], raw / FILES["mobility"])
         else:
             fetch(config["sources"][name], raw / FILES[name])
     if "borders" in names:

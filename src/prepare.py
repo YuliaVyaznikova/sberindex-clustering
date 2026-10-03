@@ -103,7 +103,10 @@ def prepare_municipalities(config):
     area = pd.Series(shapes.geometry.area.to_numpy() / 1e6, index=shapes["territory_id"].to_numpy())
     table["area_km2"] = table["territory_id"].map(area).round(3)
     table.to_csv(config["paths"]["prepared"] / "municipalities.csv", index=False)
-    print(f"municipalities: {table['territory_id'].nunique()} territories, {len(table)} versions")
+    outlines = shapes[["territory_id", "geometry"]].copy()
+    outlines["geometry"] = outlines.geometry.simplify(1500)
+    outlines.to_crs("EPSG:4326").to_parquet(config["paths"]["prepared"] / "shapes.parquet", index=False)
+    print(f"municipalities: {table['territory_id'].nunique()} territories, {len(table)} versions, {len(outlines)} outlines")
 
 
 def prepare(config):
