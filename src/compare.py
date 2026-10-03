@@ -157,7 +157,7 @@ def compare_methods(config, data, out):
 def plot_methods(table, folder):
     folder.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, 3, figsize=(18, 5.5), sharey=True)
-    colors = {"kefrin_euclidean": "tab:red", "kefrin_cosine": "tab:purple", "fused_spectral": "tab:green"}
+    colors = {"kefrin_euclidean": "tab:red", "kefrin_cosine": "tab:purple", "canus_euclidean": "tab:orange", "canus_cosine": "tab:brown", "fused_spectral": "tab:green"}
     markers = {"kmeans": "s", "ward": "D", "gmm": "v", "spectral": "^", "louvain": "o"}
     for ax, k in zip(axes, [4, 6, 8]):
         part = table[table["k"] == k]

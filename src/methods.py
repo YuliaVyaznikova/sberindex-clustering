@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.cluster import AgglomerativeClustering, KMeans, SpectralClustering
 from sklearn.mixture import GaussianMixture
 
+from .canus import canus
 from .kefrin import kefrin
 
 
@@ -50,9 +51,10 @@ def fused_spectral(graph, attribute_graph, k, alpha, seed=0):
 def joint(name, x, graph, attribute_graph, k, alpha, seed=0):
     if name == "fused_spectral":
         return fused_spectral(graph, attribute_graph, k, alpha, seed)
-    metric = name.removeprefix("kefrin_")
-    return relabel(kefrin(x, graph, k, alpha=alpha, metric=metric, seed=seed))
+    family, metric = name.split("_")
+    run = kefrin if family == "kefrin" else canus
+    return relabel(run(x, graph, k, alpha=alpha, metric=metric, seed=seed))
 
 
 ATTRIBUTE_METHODS = {"kmeans": kmeans, "ward": ward, "gmm": gmm}
-JOINT_METHODS = ["kefrin_euclidean", "kefrin_cosine", "fused_spectral"]
+JOINT_METHODS = ["kefrin_euclidean", "kefrin_cosine", "canus_euclidean", "canus_cosine", "fused_spectral"]
