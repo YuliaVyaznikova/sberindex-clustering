@@ -16,7 +16,7 @@ from .network import BLOCKS, CITIES, load_data, transform
 
 SURFACE, INK, MUTED, GRID, BACKGROUND = "#fcfcfb", "#0b0b0b", "#52514e", "#e6e5e0", "#ebeae5"
 MAP_CRS = "+proj=aea +lat_1=52 +lat_2=64 +lat_0=0 +lon_0=100 +datum=WGS84 +units=m"
-PASSPORT = {
+SUMMARY = {
     "share_food": "еда", "share_marketplaces": "маркетплейсы", "share_cafe": "общепит", "share_transport": "транспорт",
     "share_health": "здоровье", "spend_real": "траты", "wage_real": "зарплата", "emp_rate": "занятые на жителя",
     "emp_agri": "агро", "emp_mining": "добыча", "emp_manufacturing": "обработка", "emp_public": "бюджет",
@@ -47,9 +47,9 @@ def window_rows(features, types, period):
     return rows, assigned
 
 
-def passports(features, types, period):
+def summarize(features, types, period):
     rows, assigned = window_rows(features, types, period)
-    table = rows.groupby(assigned)[list(PASSPORT)].median().rename(columns=PASSPORT)
+    table = rows.groupby(assigned)[list(SUMMARY)].median().rename(columns=SUMMARY)
     for column in ["траты", "зарплата", "плотность"]:
         table[column] = np.exp(table[column])
     population = rows["population"].groupby(assigned).sum()
@@ -120,14 +120,14 @@ def municipality_shapes(config, original):
     return shapes
 
 
-def plot_map(shapes, passport, assigned, period, palette, path):
+def plot_map(shapes, summary, assigned, period, palette, path):
     shapes = shapes.assign(type=shapes["node"].map(assigned))
     fig, axes = plt.subplots(2, 3, figsize=(16, 7.6))
     for ax, t in zip(axes.ravel(), palette["order"]):
         shapes.plot(ax=ax, color=BACKGROUND, edgecolor=SURFACE, linewidth=0.1)
         shapes[shapes["type"] == t].plot(ax=ax, color=palette["colors"][t], edgecolor=SURFACE, linewidth=0.1)
         ax.set_axis_off()
-        ax.set_title(f"{palette['names'][t]}\n{int(passport.at[t, 'МО'])} МО, {passport.at[t, 'доля населения']:.0%} населения", loc="left", fontsize=10.5)
+        ax.set_title(f"{palette['names'][t]}\n{int(summary.at[t, 'МО'])} МО, {summary.at[t, 'доля населения']:.0%} населения", loc="left", fontsize=10.5)
     fig.suptitle(f"Типы местных экономик, скользящий год с концом в {period}", x=0.01, ha="left", fontsize=13)
     fig.text(0.01, 0.01, "Серым: остальные типы и МО без полных данных. Районы Москвы и Санкт-Петербурга склеены в два узла.", color=MUTED, fontsize=9)
     fig.tight_layout(rect=(0, 0.03, 1, 0.95))
@@ -369,12 +369,12 @@ def describe(config):
     first, last = periods[0], periods[-1]
     wide = types.pivot(index="territory_id", columns="period", values="type").dropna().astype(int)
 
-    passport = passports(features, types, last)
+    summary = summarize(features, types, last)
     means = profiles(features, types, last)
     delta = changes(features, types, first, last)
     shown, statistic, p_value = mobility_check(load_mobility(config, territories), types, last)
     names = pd.Series(palette["names"], name="название")
-    passport.join(names).to_csv(out / "passports.csv")
+    summary.join(names).to_csv(out / "summary.csv")
     means.join(names).to_csv(out / "profiles.csv")
     examples(features, territories, types, last).join(names).to_csv(out / "examples.csv")
     delta.join(names).to_csv(out / "changes.csv")
@@ -382,7 +382,7 @@ def describe(config):
 
     _, assigned = window_rows(features, types, last)
     shapes = municipality_shapes(config, original)
-    plot_map(shapes, passport, assigned, last, palette, figures / "types_map.png")
+    plot_map(shapes, summary, assigned, last, palette, figures / "types_map.png")
     if (out / "confidence.csv").exists():
         plot_confidence(shapes, pd.read_csv(out / "confidence.csv"), last, figures / "types_confidence.png")
         moved = pd.read_csv(out / "transition_robustness.csv", index_col="territory_id")["moved_share"]
@@ -412,7 +412,7 @@ def describe(config):
     catch_up(market, rubles, palette["order"][0]).rename(index=palette["short"]).round(3).to_csv(out / "marketplaces.csv")
     plot_marketplaces(market, palette, count, last, colors, figures / "marketplaces.png")
     with pd.option_context("display.width", 250, "display.max_columns", 30):
-        print(passport.join(names).round(3).to_string())
+        print(summary.join(names).round(3).to_string())
     print(f"mobility check: H = {statistic:.1f}, p = {p_value:.2g}, {len(shown)} municipalities")
     print(f"spending level from the local economy: out-of-fold R2 {r2:.3f}; spend 15% or more above the forecast: {(gap['gap'] >= 0.15).sum()}, below: {(gap['gap'] <= -0.15).sum()}")
     print(summary.round(3).to_string(index=False))

@@ -75,7 +75,7 @@ def plot_gap(shapes, table, r2, period, colors, path):
             y -= 0.045
         y -= 0.04
     fig.suptitle(f"Где траты не следуют за местной экономикой, окно {period}", x=0.01, ha="left", fontsize=13)
-    fig.text(0.01, 0.015, f"Прогноз уровня трат по {len(ECONOMY)} признакам труда и места, градиентный бустинг, вне выборки (5 фолдов), R² = {r2:.2f}. "
+    fig.text(0.01, 0.015, f"Прогноз уровня трат по {len(ECONOMY)} признакам труда и места, градиентный бустинг, out-of-fold на 5-fold кросс-валидации, R² = {r2:.2f}. "
              "Светло-серым: МО без полных данных.", color=colors["muted"], fontsize=9)
     fig.savefig(path, dpi=150)
     plt.close(fig)

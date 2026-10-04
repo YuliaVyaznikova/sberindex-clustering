@@ -348,7 +348,7 @@ def plot_network(mix, morans, names, order, period, n, path):
     ax.barh(range(len(rows)), rows["moran_i"], color=[BLOCK_COLORS[b] for b in rows["block"]])
     ax.set_yticks(range(len(rows)), [LABELS[f] for f in rows["feature"]], fontsize=8.5)
     ax.axvline(0, color=MUTED, linewidth=0.8)
-    ax.set_xlabel("I Морана на графе потребления (0: нет сетевой автокорреляции)")
+    ax.set_xlabel("Moran's I на графе потребления (0: нет сетевой автокорреляции)")
     handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in BLOCK_COLORS.values()]
     ax.legend(handles, ["потребление", "труд", "место"], frameon=False, loc="lower right")
     ax.set_title("Какие признаки согласованы с сетью потребления", loc="left", fontsize=11)
