@@ -23,6 +23,7 @@ python run.py compare
 python run.py track
 python run.py robustness
 python run.py describe
+python run.py validate
 ```
 
 | Шаг | Что делает | Результат |
@@ -33,6 +34,7 @@ python run.py describe
 | `track` | строит типы МО по окнам и прослеживает их во времени, около 2 минут | `results` |
 | `robustness` | проверяет устойчивость типов к параметрам и составу МО, около 50 минут | `results` |
 | `describe` | паспорта типов, изменения, внешняя проверка, карты и графики, около 20 секунд | `results`, `results/figures` |
+| `validate` | проверяет типы: признаки, сеть, мосты между типами, согласие методов, устойчивость, ранжирование методов, около 20 минут | `results`, `results/figures` |
 
 Таблицы Росстата, цены по регионам и справочник МО уже лежат в `data/prepared`. Чтобы пересобрать их из первоисточников (ещё около 5 ГБ загрузок), есть `python run.py download --all` и `python run.py prepare`, подробности в [docs/data.md](docs/data.md).
 
@@ -45,6 +47,7 @@ python run.py describe
 - [docs/metrics.md](docs/metrics.md) метрики качества кластеров
 - [docs/dynamics.md](docs/dynamics.md) отслеживание типов во времени
 - [docs/robustness.md](docs/robustness.md) устойчивость результатов
+- [docs/validation.md](docs/validation.md) проверка результатов
 
 ## Структура
 
@@ -63,6 +66,7 @@ python run.py describe
 - `src/dynamics.py` отслеживание типов во времени
 - `src/robustness.py` проверки устойчивости
 - `src/describe.py` паспорта типов и графики
+- `src/validate.py` проверка результатов
 - `src/api.py` загрузка данных через API СберИндекса
 - `data/prepared` подготовленные данные
 - `docs` документация

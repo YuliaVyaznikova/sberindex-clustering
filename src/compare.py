@@ -101,8 +101,12 @@ def subsamples(n, settings):
     return [(np.sort(rng.choice(n, int(settings["share"] * n), replace=False)), int(rng.integers(1_000_000))) for _ in range(settings["subsamples"])]
 
 
+def agreement(run, labels, samples):
+    return np.array([adjusted_rand_score(labels[keep], run(keep, seed)) for keep, seed in samples])
+
+
 def stability(run, labels, samples):
-    return float(np.mean([adjusted_rand_score(labels[keep], run(keep, seed)) for keep, seed in samples]))
+    return float(agreement(run, labels, samples).mean())
 
 
 def compare_methods(config, data, out):
