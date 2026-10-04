@@ -4,7 +4,7 @@ from scipy import sparse
 from scipy.optimize import linear_sum_assignment
 from sklearn.metrics import adjusted_rand_score, silhouette_score
 
-from .methods import fuse, relabel, spectral
+from .methods import fuse, refine, refine_costs, relabel, spectral
 from .metrics import graph_scores
 from .network import load_data, snapshot
 
@@ -97,6 +97,21 @@ def supra(affinities, ids, k, coupling):
     return [labels[offsets[t]:offsets[t + 1]] for t in range(len(ids))]
 
 
+def refine_over_time(xs, graphs, ids, labels, k, weight, smoothing):
+    costs = [pd.DataFrame(refine_costs(x, g, l, k, weight), index=i) for x, g, i, l in zip(xs, graphs, ids, labels)]
+    result = []
+    for t, (own, current) in enumerate(zip(ids, labels)):
+        total, norm = np.zeros((len(own), k)), np.zeros((len(own), 1))
+        for s, cost in enumerate(costs):
+            factor = smoothing ** abs(t - s)
+            if factor > 0:
+                part = cost.reindex(own)
+                total += factor * part.fillna(0).to_numpy()
+                norm += factor * part.notna().all(axis=1).to_numpy()[:, None]
+        result.append(refine(total / norm, current))
+    return result
+
+
 def fixed_typology(xs, affinities, k):
     reference = spectral((sum(affinities) / len(affinities)).tocsr(), k)
     centers = np.mean([[x[reference == c].mean(axis=0) for c in range(k)] for x in xs], axis=0)
@@ -129,6 +144,9 @@ def compare_dynamics(config, shots, periods, out):
     rows.append(evaluate("affect", labels, xs, graphs) | {"past_weights": ";".join(f"{w:.3f}" for w in weights)})
     for coupling in settings["couplings"]:
         rows.append(evaluate(f"supra {coupling}", supra(affinities, [ids] * len(periods), k, coupling), xs, graphs))
+    labels = supra(affinities, [ids] * len(periods), k, settings["coupling"])
+    refined = refine_over_time(xs, graphs, [ids] * len(periods), labels, k, config["model"]["refine_weight"], settings["smoothing"])
+    rows.append(evaluate(f"supra {settings['coupling']} + refinement", refined, xs, graphs))
     rows.append(evaluate("fixed typology", fixed_typology(xs, affinities, k), xs, graphs))
     table = pd.DataFrame(rows)
     table.to_csv(out / "dynamics_approaches.csv", index=False)
@@ -143,7 +161,10 @@ def track(config):
     periods, shots = snapshots(config, data)
     compare_dynamics(config, shots, periods, out)
     ids = [shots[p]["ids"] for p in periods]
-    labels = supra([shots[p]["affinity"] for p in periods], ids, config["model"]["k"], config["dynamics"]["coupling"])
+    k = config["model"]["k"]
+    labels = supra([shots[p]["affinity"] for p in periods], ids, k, config["dynamics"]["coupling"])
+    xs, graphs = [shots[p]["x"] for p in periods], [shots[p]["graph"] for p in periods]
+    labels = refine_over_time(xs, graphs, ids, labels, k, config["model"]["refine_weight"], config["dynamics"]["smoothing"])
     types = pd.concat([pd.DataFrame({"territory_id": i, "period": p, "type": l}) for p, i, l in zip(periods, ids, labels)], ignore_index=True)
     types = types.join(data["territories"][["name", "region"]], on="territory_id")
     types.to_csv(out / "types.csv", index=False)

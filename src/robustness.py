@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.optimize import linear_sum_assignment
 from sklearn.metrics import adjusted_rand_score, silhouette_score
 
-from .dynamics import supra
+from .dynamics import refine_over_time, supra
 from .methods import fuse
 from .metrics import graph_scores
 from .network import load_data, snapshot
@@ -19,14 +19,17 @@ def windows(config):
     return periods, {p: snapshot(config, data, p) for p in periods}
 
 
-def model(shots, periods, alpha, k, coupling, keep=None):
-    ids, affinities = [], []
+def model(shots, periods, config, alpha, k, coupling, keep=None):
+    ids, xs, graphs, affinities = [], [], [], []
     for p in periods:
         shot = shots[p]
         mask = np.ones(len(shot["ids"]), dtype=bool) if keep is None else np.isin(shot["ids"], keep)
         ids.append(shot["ids"][mask])
+        xs.append(shot["x"][mask])
+        graphs.append(shot["graph"][mask][:, mask].tocsr())
         affinities.append(fuse(shot["graph"], shot["attribute_graph"], alpha)[mask][:, mask].tocsr())
     labels = supra(affinities, ids, k, coupling)
+    labels = refine_over_time(xs, graphs, ids, labels, k, config["model"]["refine_weight"], config["dynamics"]["smoothing"])
     frame = pd.concat([pd.Series(l, index=pd.Index(i, name="territory_id"), name=p) for p, i, l in zip(periods, ids, labels)], axis=1)
     return frame.rename_axis(columns="period")
 
@@ -52,7 +55,7 @@ def sensitivity(config, reference, out):
         local["network"]["k"] = graph_k
         periods, shots = windows(local)
         for alpha, k, coupling in itertools.product(grid["alpha"], grid["k"], grid["coupling"]):
-            frame = model(shots, periods, alpha, k, coupling)
+            frame = model(shots, periods, config, alpha, k, coupling)
             rows.append({"graph_k": graph_k, "alpha": alpha, "k": k, "coupling": coupling, **summarize(frame, shots, periods, reference)})
             pd.DataFrame(rows).to_csv(out / "sensitivity.csv", index=False)
         print(time.strftime("%H:%M:%S"), f"sensitivity: graph k {graph_k} done, {len(rows)} configurations", flush=True)
@@ -74,7 +77,7 @@ def bootstrap(config, shots, periods, reference, out):
     frames = []
     for run in range(settings["runs"]):
         keep = rng.choice(everyone, int(settings["share"] * len(everyone)), replace=False)
-        labels = model(shots, periods, config["model"]["alpha"], k, config["dynamics"]["coupling"], keep).stack().dropna().astype(int)
+        labels = model(shots, periods, config, config["model"]["alpha"], k, config["dynamics"]["coupling"], keep).stack().dropna().astype(int)
         common = labels.index.intersection(stacked.index)
         frames.append(pd.DataFrame({"run": run, "type": align(stacked.loc[common].to_numpy(), labels.loc[common].to_numpy(), k)}, index=common))
         if (run + 1) % 25 == 0:
@@ -95,7 +98,7 @@ def robustness(config):
     out = config["paths"]["results"]
     out.mkdir(parents=True, exist_ok=True)
     periods, shots = windows(config)
-    reference = model(shots, periods, config["model"]["alpha"], config["model"]["k"], config["dynamics"]["coupling"])
+    reference = model(shots, periods, config, config["model"]["alpha"], config["model"]["k"], config["dynamics"]["coupling"])
     sensitivity(config, reference, out)
     bootstrap(config, shots, periods, reference, out)
     confidence = pd.read_csv(out / "confidence.csv")

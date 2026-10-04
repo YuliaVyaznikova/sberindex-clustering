@@ -48,7 +48,8 @@ def single_window(config, data, period, attribute_blocks, edge_blocks):
     local = copy.deepcopy(config)
     local["network"]["attribute_blocks"], local["network"]["edge_blocks"] = attribute_blocks, edge_blocks
     shot = snapshot(local, data, period)
-    labels = methods.fused_spectral(shot["graph"], shot["attribute_graph"], config["model"]["k"], config["model"]["alpha"])
+    model = config["model"]
+    labels = methods.refined_spectral(shot["x"], shot["graph"], shot["attribute_graph"], model["k"], model["alpha"], model["refine_weight"])
     return pd.Series(labels, index=shot["ids"])
 
 
@@ -199,7 +200,7 @@ def partitions(config, x, w, wa):
             result[name] = labels
     for name in methods.JOINT_METHODS:
         for alpha in config["validate"]["consensus_alphas"]:
-            result[f"{name} {alpha}"] = methods.joint(name, x, w, wa, k, alpha)
+            result[f"{name} {alpha}"] = methods.joint(name, x, w, wa, k, alpha, config["model"]["refine_weight"])
     return result
 
 
@@ -286,7 +287,8 @@ def runner(config, name, alpha, x, w, wa, k):
     if name in methods.GRAPH_METHODS:
         _, resolution = with_k(methods.GRAPH_METHODS[name], w, k, config["compare"]["resolutions"])
         return lambda keep, seed: methods.GRAPH_METHODS[name](w[keep][:, keep], resolution, seed)
-    return lambda keep, seed: methods.joint(name, x[keep], w[keep][:, keep], wa[keep][:, keep], k, alpha, seed)
+    weight = config["model"]["refine_weight"]
+    return lambda keep, seed: methods.joint(name, x[keep], w[keep][:, keep], wa[keep][:, keep], k, alpha, weight, seed)
 
 
 def check_stability(config, x, w, wa, best):
@@ -302,9 +304,9 @@ def check_stability(config, x, w, wa, best):
 
     for k in settings["stability_ks"]:
         record("curve", "kmeans", np.nan, k)
-        record("curve", "fused_spectral", model["alpha"], k)
+        record("curve", "refined_spectral", model["alpha"], k)
     for name, alpha in best[["method", "alpha"]].itertuples(index=False):
-        if name != "kmeans" and not (name == "fused_spectral" and alpha == model["alpha"]):
+        if name != "kmeans" and not (name == "refined_spectral" and alpha == model["alpha"]):
             record("best", name, alpha, model["k"])
     return pd.DataFrame(rows)
 
@@ -380,7 +382,7 @@ def plot_consensus(ari, k, period, path):
 
 def plot_stability(table, alpha, runs, path):
     fig, ax = plt.subplots(figsize=(10, 4.8))
-    for offset, (name, label, color) in zip([-0.08, 0.08], [("kmeans", "k-means", "#52514e"), ("fused_spectral", f"совместная спектральная, alpha {alpha}", "#1baf7a")]):
+    for offset, (name, label, color) in zip([-0.08, 0.08], [("kmeans", "k-means", "#52514e"), ("refined_spectral", f"совместная спектральная с уточнением, alpha {alpha}", "#1baf7a")]):
         part = table[(table["part"] == "curve") & table["config"].str.startswith(name)]
         ax.errorbar(part["k"] + offset, part["mean"], yerr=[part["mean"] - part["p5"], part["p95"] - part["mean"]], fmt="o-", color=color, capsize=3, label=label, markersize=5)
     ax.axhline(0.85, color=MUTED, linestyle="--", linewidth=0.9)

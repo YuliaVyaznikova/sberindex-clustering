@@ -4,7 +4,7 @@ from scipy import sparse
 from sklearn.metrics import adjusted_rand_score
 
 from src import methods
-from src.dynamics import supra
+from src.dynamics import refine_over_time, supra
 from src.network import cosine, knn
 
 
@@ -43,8 +43,8 @@ def test_fuse_mixes_normalized_graphs():
 def test_joint_methods_are_reproducible_and_find_clear_clusters(name):
     x, truth = blobs()
     w, wa = graphs(x)
-    first = methods.joint(name, x, w, wa, 3, 0.3, seed=1)
-    second = methods.joint(name, x, w, wa, 3, 0.3, seed=1)
+    first = methods.joint(name, x, w, wa, 3, 0.3, 0.7, seed=1)
+    second = methods.joint(name, x, w, wa, 3, 0.3, 0.7, seed=1)
     assert (first == second).all()
     assert len(np.unique(first)) == 3
     assert adjusted_rand_score(truth, first) > 0.8
@@ -70,3 +70,26 @@ def test_supra_keeps_types_across_identical_windows():
     first, second = supra([affinity, affinity], [ids, ids], 3, 1.0)
     assert (first == second).all()
     assert adjusted_rand_score(truth, first) > 0.9
+
+
+def test_refinement_moves_a_wrong_label_back():
+    x, truth = blobs()
+    w, _ = graphs(x)
+    labels = truth.copy()
+    labels[0] = 1
+    assert (methods.refine(methods.refine_costs(x, w, labels, 3, 0.0), labels) == truth).all()
+
+
+def test_refinement_keeps_clear_clusters():
+    x, truth = blobs()
+    w, wa = graphs(x)
+    assert adjusted_rand_score(truth, methods.refined_spectral(x, w, wa, 3, 0.3, 0.7)) == pytest.approx(1.0)
+
+
+def test_full_smoothing_gives_one_type_per_municipality():
+    x, truth = blobs()
+    w, _ = graphs(x)
+    noisy = x + np.random.default_rng(1).normal(scale=1.5, size=x.shape)
+    ids = np.arange(len(x))
+    first, second = refine_over_time([x, noisy], [w, knn(cosine(noisy[:, :3]), 8)], [ids, ids], [truth, truth], 3, 0.3, 1.0)
+    assert (first == second).all()

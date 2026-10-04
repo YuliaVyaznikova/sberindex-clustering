@@ -31,7 +31,8 @@ SHOWN = [
     ("kefrin_euclidean", "KEFRiN, евклид", "#eb6834", "D"),
     ("spectral", "спектральная по графу", "#2a78d6", "^"),
     ("dmon", "DMoN", "#e87ba4", "v"),
-    ("fused_spectral", "совместная спектральная", "#1baf7a", "o"),
+    ("fused_spectral", "совместная спектральная без уточнения", "#eda100", "P"),
+    ("refined_spectral", "совместная спектральная с уточнением", "#1baf7a", "o"),
 ]
 INDICES = ["SW", "CH", "S_Dbw", "DB", "AVI", "AVU", "MQ", "within"]
 
@@ -88,7 +89,7 @@ def dataset(config, name, centers, residuals, sizes, rng):
 
 
 def partitions(config, x, w, wa, k):
-    alpha = config["model"]["alpha"]
+    alpha, weight = config["model"]["alpha"], config["model"]["refine_weight"]
     result = {name: method(x, k) for name, method in methods.ATTRIBUTE_METHODS.items()}
     result["spectral"] = methods.spectral(w, k)
     for name, method in methods.GRAPH_METHODS.items():
@@ -96,10 +97,10 @@ def partitions(config, x, w, wa, k):
         if labels is not None:
             result[name] = labels
     for name in methods.JOINT_METHODS:
-        if name != "fused_spectral":
-            result[f"{name} {alpha}"] = methods.joint(name, x, w, wa, k, alpha)
+        if name != "refined_spectral":
+            result[f"{name} {alpha}"] = methods.joint(name, x, w, wa, k, alpha, weight)
     for value in config["synthetic"]["alphas"]:
-        result[f"fused_spectral {value}"] = methods.joint("fused_spectral", x, w, wa, k, value)
+        result[f"refined_spectral {value}"] = methods.joint("refined_spectral", x, w, wa, k, value, weight)
     return result
 
 
@@ -117,7 +118,7 @@ def plot(table, alpha, n, path):
             ax.plot([low, high], [y, y], color=color, linewidth=2, solid_capstyle="round")
             name = f"{label}, alpha {alpha}" if method in methods.JOINT_METHODS else label
             ax.scatter([mean], [y], s=64, marker=marker, color=color, edgecolor="white", linewidth=1.2, zorder=3, label=name if row == 0 else None)
-            if method in ("kmeans", "fused_spectral"):
+            if method in ("kmeans", "refined_spectral"):
                 ax.text(high + 0.012, y, f"{mean:.2f}", va="center", fontsize=8.5, color=INK)
     ax.set_yticks(range(len(SCENARIOS)), list(SCENARIOS.values()))
     ax.set_ylim(len(SCENARIOS) - 0.5, -0.5)
@@ -128,7 +129,7 @@ def plot(table, alpha, n, path):
     fig.legend(frameon=False, fontsize=9, loc="upper left", bbox_to_anchor=(0.01, 0.925), ncol=3)
     fig.suptitle("Синтетические данные с известными типами: ARI разных методов в шести сценариях", x=0.01, ha="left", fontsize=12)
     fig.text(0.01, 0.012, f"{n} МО; центры типов, их размеры и разброс внутри типов взяты из окна модели. Граф строится как в модели (ближайшие соседи по тратам),\n"
-             "кроме сценария со своим графом (planted partition). Подписи: среднее у k-means и у совместной спектральной.", color=MUTED, fontsize=8.5)
+             "кроме сценария со своим графом (planted partition). Подписи: среднее у k-means и у модели (совместная спектральная с уточнением).", color=MUTED, fontsize=8.5)
     fig.subplots_adjust(left=0.215, right=0.99, top=0.83, bottom=0.15)
     fig.savefig(path, dpi=150)
     plt.close(fig)

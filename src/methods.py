@@ -5,7 +5,7 @@ from sklearn.mixture import GaussianMixture
 
 from .canus import canus
 from .dmon import dmon
-from .kefrin import kefrin
+from .kefrin import joint_distances, kefrin, prepare, scatter
 
 
 def relabel(labels):
@@ -58,9 +58,32 @@ def fused_spectral(graph, attribute_graph, k, alpha, seed=0):
     return spectral(fuse(graph, attribute_graph, alpha), k, seed)
 
 
-def joint(name, x, graph, attribute_graph, k, alpha, seed=0):
+def refine_costs(x, graph, labels, k, weight):
+    y, p = prepare(x, graph, "euclidean")
+    rho, xi = (1 - weight) / scatter(y), weight / scatter(p)
+    found = np.unique(labels)
+    cy = np.array([y[labels == c].mean(axis=0) for c in found])
+    cp = np.array([p[labels == c].mean(axis=0) for c in found])
+    costs = np.full((len(x), k), np.inf)
+    costs[:, found] = len(x) * joint_distances(y, p, cy, cp, rho, xi)
+    return costs
+
+
+def refine(costs, labels):
+    moved = costs.argmin(axis=1)
+    return moved if len(np.unique(moved)) == len(np.unique(labels)) else labels
+
+
+def refined_spectral(x, graph, attribute_graph, k, alpha, weight, seed=0):
+    labels = fused_spectral(graph, attribute_graph, k, alpha, seed)
+    return relabel(refine(refine_costs(x, graph, labels, k, weight), labels))
+
+
+def joint(name, x, graph, attribute_graph, k, alpha, weight, seed=0):
     if name == "fused_spectral":
         return fused_spectral(graph, attribute_graph, k, alpha, seed)
+    if name == "refined_spectral":
+        return refined_spectral(x, graph, attribute_graph, k, alpha, weight, seed)
     if name == "dmon":
         return relabel(dmon(x, fuse(graph, attribute_graph, alpha), k, seed=seed))
     family, metric = name.split("_")
@@ -70,4 +93,4 @@ def joint(name, x, graph, attribute_graph, k, alpha, seed=0):
 
 ATTRIBUTE_METHODS = {"kmeans": kmeans, "ward": ward, "gmm": gmm}
 GRAPH_METHODS = {"louvain": louvain, "leiden": leiden}
-JOINT_METHODS = ["kefrin_euclidean", "kefrin_cosine", "canus_euclidean", "canus_cosine", "dmon", "fused_spectral"]
+JOINT_METHODS = ["kefrin_euclidean", "kefrin_cosine", "canus_euclidean", "canus_cosine", "dmon", "fused_spectral", "refined_spectral"]

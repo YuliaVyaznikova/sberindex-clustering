@@ -119,6 +119,7 @@ def compare_methods(config, data, out):
     pd.Series(defaults, name="alpha").to_csv(out / "kefrin_default_alpha.csv")
     print("KEFRiN with rho = xi = 1 corresponds to alpha", {m: round(a, 3) for m, a in defaults.items()}, flush=True)
     rows = []
+    weight = config["model"]["refine_weight"]
 
     def add(method, source, alpha, labels, stable):
         rows.append({"method": method, "source": source, "alpha": alpha, "stability": stable, **panel(x, w, labels, rng)})
@@ -146,10 +147,10 @@ def compare_methods(config, data, out):
         start = time.time()
         for k in settings["joint_ks"]:
             for alpha in settings["alphas"]:
-                labels = methods.joint(name, x, w, wa, k, alpha)
+                labels = methods.joint(name, x, w, wa, k, alpha, weight)
                 stable = np.nan
                 if alpha in settings["stable_alphas"]:
-                    stable = stability(lambda keep, seed: methods.joint(name, x[keep], w[keep][:, keep], wa[keep][:, keep], k, alpha, seed), labels, samples)
+                    stable = stability(lambda keep, seed: methods.joint(name, x[keep], w[keep][:, keep], wa[keep][:, keep], k, alpha, weight, seed), labels, samples)
                 add(name, "joint", alpha, labels, stable)
             pd.DataFrame(rows).to_csv(out / "methods.csv", index=False)
         print(f"{name} {time.time() - start:.0f}s", flush=True)
@@ -163,7 +164,7 @@ def compare_methods(config, data, out):
 def plot_methods(table, model, folder):
     folder.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, 3, figsize=(18, 5.5), sharey=True)
-    colors = {"kefrin_euclidean": "tab:red", "kefrin_cosine": "tab:purple", "canus_euclidean": "tab:orange", "canus_cosine": "tab:brown", "dmon": "tab:pink", "fused_spectral": "tab:green"}
+    colors = {"kefrin_euclidean": "tab:red", "kefrin_cosine": "tab:purple", "canus_euclidean": "tab:orange", "canus_cosine": "tab:brown", "dmon": "tab:pink", "fused_spectral": "tab:olive", "refined_spectral": "tab:green"}
     markers = {"kmeans": "s", "ward": "D", "gmm": "v", "spectral": "^", "louvain": "o", "leiden": "P"}
     for ax, k in zip(axes, [4, 6, 8]):
         part = table[table["k"] == k]
@@ -173,7 +174,7 @@ def plot_methods(table, model, folder):
         for name, marker in markers.items():
             point = part[part["method"] == name]
             ax.scatter(point["SW"], point["MQ"], marker=marker, s=60, color="black", label=name, zorder=5)
-        chosen = part[(part["method"] == "fused_spectral") & (part["alpha"] == model["alpha"])]
+        chosen = part[(part["method"] == "refined_spectral") & (part["alpha"] == model["alpha"])]
         ax.scatter(chosen["SW"], chosen["MQ"], s=220, facecolors="none", edgecolors="tab:green", linewidths=2, zorder=6)
         ax.set_title(f"k = {k}")
         ax.set_xlabel("SW, пространство признаков")

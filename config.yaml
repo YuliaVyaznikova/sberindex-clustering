@@ -130,10 +130,12 @@ compare:
 
 model:
   alpha: 0.3
+  refine_weight: 0.7
   k: 6
 
 dynamics:
   coupling: 1.0
+  smoothing: 0.3
   couplings: [0.1, 0.3, 1.0, 3.0, 10.0]
   past_weights: [0.3, 0.5, 0.7, 0.8, 0.9]
   affect_iterations: 3
