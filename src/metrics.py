@@ -49,6 +49,7 @@ def graph_scores(w, labels):
         "ANUI": avi / (1 + avi * avu),
         "MQ": float(np.sum(internal / (two_m / 2) - (total / two_m) ** 2)),
         "DM": float(np.sum((internal - total ** 2 / (2 * two_m)) / sizes)),
+        "within": float(inside.sum() / two_m),
     }
 
 

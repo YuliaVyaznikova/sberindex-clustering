@@ -96,13 +96,13 @@ def compare_edges_over_time(config, data, out):
     print(table.groupby("graph")[["edge_jaccard", "louvain_ari"]].mean().round(3).to_string())
 
 
-def stability(run, labels, settings, rng):
-    n = len(labels)
-    scores = []
-    for _ in range(settings["subsamples"]):
-        keep = np.sort(rng.choice(n, int(settings["share"] * n), replace=False))
-        scores.append(adjusted_rand_score(labels[keep], run(keep, int(rng.integers(1_000_000)))))
-    return float(np.mean(scores))
+def subsamples(n, settings):
+    rng = np.random.default_rng(settings["seed"])
+    return [(np.sort(rng.choice(n, int(settings["share"] * n), replace=False)), int(rng.integers(1_000_000))) for _ in range(settings["subsamples"])]
+
+
+def stability(run, labels, samples):
+    return float(np.mean([adjusted_rand_score(labels[keep], run(keep, seed)) for keep, seed in samples]))
 
 
 def compare_methods(config, data, out):
@@ -110,6 +110,7 @@ def compare_methods(config, data, out):
     rng = np.random.default_rng(settings["seed"])
     shot = snapshot(config, data, settings["period"])
     x, w, wa = shot["x"], shot["graph"], shot["attribute_graph"]
+    samples = subsamples(len(x), settings)
     defaults = {metric: default_alpha(x, w, metric) for metric in ["euclidean", "cosine"]}
     pd.Series(defaults, name="alpha").to_csv(out / "kefrin_default_alpha.csv")
     print("KEFRiN with rho = xi = 1 corresponds to alpha", {m: round(a, 3) for m, a in defaults.items()}, flush=True)
@@ -122,18 +123,19 @@ def compare_methods(config, data, out):
     for name, method in methods.ATTRIBUTE_METHODS.items():
         for k in settings["ks"]:
             labels = method(x, k)
-            add(name, "attributes", np.nan, labels, stability(lambda keep, seed: method(x[keep], k, seed), labels, settings, rng))
+            add(name, "attributes", np.nan, labels, stability(lambda keep, seed: method(x[keep], k, seed), labels, samples))
     for k in settings["ks"]:
         labels = methods.spectral(w, k)
-        add("spectral", "graph", np.nan, labels, stability(lambda keep, seed: methods.spectral(w[keep][:, keep], k, seed), labels, settings, rng))
-    found = {}
-    for resolution in np.geomspace(0.05, 3.0, settings["louvain_resolutions"]):
-        labels = methods.louvain(w, resolution)
-        k = labels.max() + 1
-        if k in settings["ks"] and k not in found:
-            found[k] = (resolution, labels)
-    for k, (resolution, labels) in sorted(found.items()):
-        add("louvain", "graph", np.nan, labels, stability(lambda keep, seed: methods.louvain(w[keep][:, keep], resolution, seed), labels, settings, rng))
+        add("spectral", "graph", np.nan, labels, stability(lambda keep, seed: methods.spectral(w[keep][:, keep], k, seed), labels, samples))
+    for name, method in methods.GRAPH_METHODS.items():
+        found = {}
+        for resolution in np.geomspace(0.05, 3.0, settings["resolutions"]):
+            labels = method(w, resolution)
+            k = labels.max() + 1
+            if k in settings["ks"] and k not in found:
+                found[k] = (resolution, labels)
+        for k, (resolution, labels) in sorted(found.items()):
+            add(name, "graph", np.nan, labels, stability(lambda keep, seed: method(w[keep][:, keep], resolution, seed), labels, samples))
     print(f"baselines {time.time() - start:.0f}s", flush=True)
 
     for name in methods.JOINT_METHODS:
@@ -143,38 +145,38 @@ def compare_methods(config, data, out):
                 labels = methods.joint(name, x, w, wa, k, alpha)
                 stable = np.nan
                 if alpha in settings["stable_alphas"]:
-                    stable = stability(lambda keep, seed: methods.joint(name, x[keep], w[keep][:, keep], wa[keep][:, keep], k, alpha, seed), labels, settings, rng)
+                    stable = stability(lambda keep, seed: methods.joint(name, x[keep], w[keep][:, keep], wa[keep][:, keep], k, alpha, seed), labels, samples)
                 add(name, "joint", alpha, labels, stable)
             pd.DataFrame(rows).to_csv(out / "methods.csv", index=False)
         print(f"{name} {time.time() - start:.0f}s", flush=True)
 
     table = pd.DataFrame(rows)
     table.to_csv(out / "methods.csv", index=False)
-    plot_methods(table, out / "figures")
+    plot_methods(table, config["model"], out / "figures")
     return table
 
 
-def plot_methods(table, folder):
+def plot_methods(table, model, folder):
     folder.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, 3, figsize=(18, 5.5), sharey=True)
-    colors = {"kefrin_euclidean": "tab:red", "kefrin_cosine": "tab:purple", "canus_euclidean": "tab:orange", "canus_cosine": "tab:brown", "fused_spectral": "tab:green"}
-    markers = {"kmeans": "s", "ward": "D", "gmm": "v", "spectral": "^", "louvain": "o"}
+    colors = {"kefrin_euclidean": "tab:red", "kefrin_cosine": "tab:purple", "canus_euclidean": "tab:orange", "canus_cosine": "tab:brown", "dmon": "tab:pink", "fused_spectral": "tab:green"}
+    markers = {"kmeans": "s", "ward": "D", "gmm": "v", "spectral": "^", "louvain": "o", "leiden": "P"}
     for ax, k in zip(axes, [4, 6, 8]):
         part = table[table["k"] == k]
         for name, color in colors.items():
             line = part[part["method"] == name].sort_values("alpha")
-            ax.plot(line["SW"], line["MQ"], marker="o", color=color, label=name)
-            for _, row in line.iterrows():
-                ax.annotate(f"{row['alpha']:.1f}", (row["SW"], row["MQ"]), fontsize=7, color=color)
+            ax.plot(line["SW"], line["MQ"], marker="o", markersize=3.5, linewidth=1.2, color=color, label=name)
         for name, marker in markers.items():
             point = part[part["method"] == name]
-            ax.scatter(point["SW"], point["MQ"], marker=marker, s=70, color="black", label=name, zorder=5)
+            ax.scatter(point["SW"], point["MQ"], marker=marker, s=60, color="black", label=name, zorder=5)
+        chosen = part[(part["method"] == "fused_spectral") & (part["alpha"] == model["alpha"])]
+        ax.scatter(chosen["SW"], chosen["MQ"], s=220, facecolors="none", edgecolors="tab:green", linewidths=2, zorder=6)
         ax.set_title(f"k = {k}")
         ax.set_xlabel("SW, пространство признаков")
         ax.grid(alpha=0.3)
     axes[0].set_ylabel("MQ, граф потребления")
-    axes[0].legend(fontsize=8)
-    fig.suptitle("Качество в пространстве признаков и на графе: базовые методы и путь совместных методов по весу графа")
+    axes[0].legend(fontsize=7.5, loc="lower left", ncol=2)
+    fig.suptitle(f"Качество в пространстве признаков и на графе: линии это путь совместных методов по весу графа alpha от 0 до 1, кружок это выбранная модель (alpha {model['alpha']})")
     fig.tight_layout()
     fig.savefig(folder / "methods_tradeoff.png", dpi=130)
     plt.close(fig)

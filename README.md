@@ -8,8 +8,11 @@
 
 ```
 python -m venv .venv
+.venv/Scripts/pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
 .venv/Scripts/pip install -r requirements.txt
 ```
+
+PyTorch нужен только для метода DMoN, достаточно версии для процессора. В Linux и macOS путь к pip `.venv/bin/pip`, без отдельной первой команды pip в Linux поставит PyTorch с CUDA (несколько гигабайт).
 
 ## Запуск
 
@@ -26,7 +29,7 @@ python run.py describe
 |---|---|---|
 | `download` | скачивает пакет данных конкурса (20 МБ) и индекс мобильности | `data/raw` |
 | `features` | собирает признаки МО по кварталам и по скользящему году | `data/processed` |
-| `compare` | сравнивает правила рёбер и методы кластеризации, около 50 минут | `results` |
+| `compare` | сравнивает правила рёбер и методы кластеризации, около 75 минут | `results` |
 | `track` | строит типы МО по окнам и прослеживает их во времени, около 2 минут | `results` |
 | `robustness` | проверяет устойчивость типов к параметрам и составу МО, около 50 минут | `results` |
 | `describe` | паспорта типов, изменения, внешняя проверка, карты и графики, около 20 секунд | `results`, `results/figures` |
@@ -53,6 +56,7 @@ python run.py describe
 - `src/network.py` отбор узлов, преобразование признаков, правила рёбер
 - `src/kefrin.py` метод KEFRiN
 - `src/canus.py` метод CANUS
+- `src/dmon.py` метод DMoN
 - `src/methods.py` методы кластеризации
 - `src/metrics.py` метрики качества кластеров
 - `src/compare.py` сравнение правил рёбер и методов

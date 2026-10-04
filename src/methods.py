@@ -4,6 +4,7 @@ from sklearn.cluster import AgglomerativeClustering, KMeans, SpectralClustering
 from sklearn.mixture import GaussianMixture
 
 from .canus import canus
+from .dmon import dmon
 from .kefrin import kefrin
 
 
@@ -32,12 +33,21 @@ def spectral(w, k, seed=0):
     return relabel(model.fit_predict(w))
 
 
-def louvain(w, resolution, seed=0):
-    graph = nx.from_scipy_sparse_array(w)
-    labels = np.empty(w.shape[0], dtype=int)
-    for c, nodes in enumerate(nx.community.louvain_communities(graph, weight="weight", resolution=resolution, seed=seed)):
+def from_communities(communities, n):
+    labels = np.empty(n, dtype=int)
+    for c, nodes in enumerate(communities):
         labels[list(nodes)] = c
     return relabel(labels)
+
+
+def louvain(w, resolution, seed=0):
+    graph = nx.from_scipy_sparse_array(w)
+    return from_communities(nx.community.louvain_communities(graph, weight="weight", resolution=resolution, seed=seed), w.shape[0])
+
+
+def leiden(w, resolution, seed=0):
+    graph = nx.from_scipy_sparse_array(w)
+    return from_communities(nx.community.leiden_communities(graph, weight="weight", resolution=resolution, metric="modularity", seed=seed), w.shape[0])
 
 
 def fuse(graph, attribute_graph, alpha):
@@ -51,10 +61,13 @@ def fused_spectral(graph, attribute_graph, k, alpha, seed=0):
 def joint(name, x, graph, attribute_graph, k, alpha, seed=0):
     if name == "fused_spectral":
         return fused_spectral(graph, attribute_graph, k, alpha, seed)
+    if name == "dmon":
+        return relabel(dmon(x, fuse(graph, attribute_graph, alpha), k, seed=seed))
     family, metric = name.split("_")
     run = kefrin if family == "kefrin" else canus
     return relabel(run(x, graph, k, alpha=alpha, metric=metric, seed=seed))
 
 
 ATTRIBUTE_METHODS = {"kmeans": kmeans, "ward": ward, "gmm": gmm}
-JOINT_METHODS = ["kefrin_euclidean", "kefrin_cosine", "canus_euclidean", "canus_cosine", "fused_spectral"]
+GRAPH_METHODS = {"louvain": louvain, "leiden": leiden}
+JOINT_METHODS = ["kefrin_euclidean", "kefrin_cosine", "canus_euclidean", "canus_cosine", "dmon", "fused_spectral"]

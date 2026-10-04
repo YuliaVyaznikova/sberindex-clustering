@@ -78,10 +78,10 @@ compare:
   ks: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
   joint_ks: [3, 4, 5, 6, 7, 8, 9, 10]
   alphas: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-  stable_alphas: [0.0, 0.3, 0.5]
+  stable_alphas: [0.0, 0.3, 0.5, 1.0]
   subsamples: 5
   share: 0.9
-  louvain_resolutions: 40
+  resolutions: 40
   seed: 0
 
 model:
