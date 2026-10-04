@@ -6,6 +6,7 @@ import pandas as pd
 import pyogrio
 
 from .download import FILES
+from .remote import open_zip
 
 RUSSIA = "Российская Федерация"
 UPPER = "Муниципальное образование верхнего уровня"
@@ -28,28 +29,30 @@ MUNICIPALITY_COLUMNS = {
 
 
 def year_parts(archive, code, years):
-    parts = {}
+    parts, whole = {}, []
     for name in archive.namelist():
         match = re.search(rf"data_{code}_year(\d{{4}})_", name)
         if match and int(match.group(1)) in years:
             parts[int(match.group(1))] = name
-    return [parts[year] for year in sorted(parts)]
+        elif re.fullmatch(rf"data_{code}_\d+_v\d+\.csv", name):
+            whole.append(name)
+    return [parts[year] for year in sorted(parts)] or whole
 
 
 def read_indicator(archive, spec):
-    filters = spec.get("filters", {})
-    keep = set(BASE + spec["columns"] + list(filters))
+    filters, columns = spec.get("filters", {}), spec.get("columns", [])
+    keep = set(BASE + columns + list(filters))
     frames = []
     for part in year_parts(archive, spec["code"], spec["years"]):
         with archive.open(part) as f:
             for chunk in pd.read_csv(f, sep=";", dtype=str, chunksize=500_000, usecols=lambda c: c in keep):
-                chunk = chunk[chunk["mun_level"] == UPPER]
+                chunk = chunk[(chunk["mun_level"] == UPPER) & chunk["year"].astype(int).isin(spec["years"])]
                 for column, allowed in filters.items():
                     chunk = chunk[chunk[column].isin(allowed)]
                 frames.append(chunk)
     table = pd.concat(frames, ignore_index=True)
     table = table.rename(columns={"indicator_period": "period", "indicator_value": "value"})
-    return table[["oktmo", "oktmo_stable", "municipality", "year", "period", *spec["columns"], "value"]]
+    return table[["oktmo", "oktmo_stable", "municipality", "year", "period", *columns, "value"]]
 
 
 def prepare_rosstat(config):
@@ -59,6 +62,15 @@ def prepare_rosstat(config):
             table = read_indicator(archive, spec)
         table.to_csv(out / f"{name}.csv.gz", index=False)
         print(f"{name}: {len(table)} rows")
+
+
+def prepare_external(config):
+    settings = config["external"]
+    for name, spec in settings["indicators"].items():
+        with open_zip(settings["source"].format(spec["section"])) as archive:
+            table = read_indicator(archive, spec)
+        table.to_csv(config["paths"]["prepared"] / f"external_{name}.csv.gz", index=False)
+        print(f"external {name}: {len(table)} rows")
 
 
 def read_sdmx(path):
@@ -118,3 +130,4 @@ def prepare(config):
     prepare_municipalities(config)
     prepare_prices(config)
     prepare_rosstat(config)
+    prepare_external(config)

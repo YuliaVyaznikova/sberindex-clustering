@@ -12,7 +12,7 @@ from scipy import sparse
 from scipy.cluster.hierarchy import leaves_list, linkage
 from scipy.sparse.csgraph import connected_components, shortest_path
 from scipy.spatial.distance import squareform
-from scipy.stats import mannwhitneyu, spearmanr
+from scipy.stats import chi2_contingency, kruskal, mannwhitneyu, spearmanr
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.inspection import permutation_importance
 from sklearn.metrics import adjusted_rand_score, roc_auc_score
@@ -21,6 +21,7 @@ from sklearn.model_selection import cross_val_score
 from . import methods
 from .compare import agreement, subsamples
 from .describe import INK, MUTED, PROFILE, style
+from .features import load_territories, match, read_prepared
 from .network import BLOCKS, load_data, snapshot, transform
 
 LABELS = {
@@ -227,6 +228,56 @@ def check_consensus(parts, k):
     return ari, summary, support
 
 
+def external_values(config, data, period):
+    features = data["features"]
+    population = features[features["period"] == period].set_index("territory_id")["population"]
+    _, oktmo = load_territories(config, population.index)
+    result = {}
+    for name, spec in config["external"]["indicators"].items():
+        table = match(read_prepared(config, f"external_{name}.csv.gz"), oktmo, [])
+        latest = table.sort_values("year").drop_duplicates("territory_id", keep="last").set_index("territory_id")["value"]
+        values = latest * spec["scale"] / population.reindex(latest.index)
+        result[name] = values.replace([np.inf, -np.inf], np.nan).dropna()
+    return result
+
+
+def eta_squared_h(values, labels):
+    groups = [values[labels == g] for g in np.unique(labels)]
+    return (kruskal(*groups).statistic - len(groups) + 1) / (len(values) - len(groups))
+
+
+def check_external(values, parts, ids, regions):
+    final = pd.Series(parts["multilayer"], index=ids)
+    scores, medians = [], {}
+    for name, series in values.items():
+        series = series.reindex(ids).dropna()
+        logged = np.log1p(series.clip(lower=0)).to_numpy()
+        labels = final[series.index].to_numpy()
+        statistic, p_value = kruskal(*[logged[labels == t] for t in np.unique(labels)])
+        row = {"indicator": name, "municipalities": len(series), "kruskal_h": statistic, "p": p_value}
+        row.update({method: eta_squared_h(logged, pd.Series(part, index=ids)[series.index].to_numpy()) for method, part in parts.items()})
+        row["region"] = eta_squared_h(logged, regions.reindex(series.index).to_numpy())
+        scores.append(row)
+        medians[name] = series.groupby(final[series.index]).median()
+    return pd.DataFrame(scores).set_index("indicator"), pd.DataFrame(medians)
+
+
+def four_russias(config, data, final, period):
+    settings = config["four_russias"]
+    territories = data["territories"].loc[final.index]
+    features = data["features"]
+    population = features[features["period"] == period].set_index("territory_id")["population"].reindex(final.index)
+    city = territories["type"].isin(settings["city_types"])
+    group = pd.Series(3, index=final.index, name="russia")
+    group[city & (population >= settings["middle_city"])] = 2
+    group[city & (population >= settings["big_city"])] = 1
+    group[territories["region_code"].isin(settings["fourth_region_codes"])] = 4
+    counts = pd.crosstab(final.rename("type"), group)
+    people = pd.crosstab(final.rename("type"), group, values=population / 1e6, aggfunc="sum").fillna(0)
+    chi2 = chi2_contingency(counts.to_numpy())[0]
+    return counts, people, np.sqrt(chi2 / (counts.to_numpy().sum() * (min(counts.shape) - 1))), group
+
+
 def runner(config, name, alpha, x, w, wa, k):
     if name in methods.ATTRIBUTE_METHODS:
         return lambda keep, seed: methods.ATTRIBUTE_METHODS[name](x[keep], k, seed)
@@ -399,6 +450,18 @@ def validate(config):
     plot_consensus(ari, k, period, figures / "methods_ari.png")
     print(consensus.round(3).to_string())
     print(f"method support vs bootstrap confidence: Spearman {spearmanr(support, window_confidence.reindex(final.index[keep]), nan_policy='omit').statistic:.3f}", flush=True)
+
+    values = external_values(config, data, period)
+    external, medians = check_external(values, parts, final.index[keep], data["territories"]["region"])
+    external.round(4).to_csv(out / "validate_external.csv")
+    medians.rename(index=names).round(2).to_csv(out / "validate_external_medians.csv")
+    print(external[["municipalities", "kruskal_h", "p"]].to_string())
+    print("eta squared H, mean over indicators:", external.drop(columns=["municipalities", "kruskal_h", "p"]).mean().round(3).sort_values(ascending=False).to_dict())
+    counts, people, cramer, groups = four_russias(config, data, final[keep].astype(int), period)
+    counts.rename(index=names).to_csv(out / "validate_four_russias.csv")
+    people.rename(index=names).round(3).to_csv(out / "validate_four_russias_population.csv")
+    print(counts.rename(index=names).to_string())
+    print(f"four Russias: Cramer V {cramer:.3f}, ARI {adjusted_rand_score(groups, final[keep].astype(int)):.3f}", flush=True)
 
     ranking = rank_methods(pd.read_csv(out / "methods.csv"), k)
     ranking.round(4).to_csv(out / "validate_ranking.csv")

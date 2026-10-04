@@ -46,6 +46,50 @@ rosstat:
       grup_2: [Всего]
       vozr: [Всего]
 
+external:
+  source: https://storage.yandexcloud.net/tochno-st-catalog/Rosstat/data_bdmo_118_v20250918/by_indicator/data_section{}_112_v20250918.zip
+  indicators:
+    retail:
+      section: 2
+      code: Y48401003
+      years: [2024]
+      filters:
+        indicator_period: [Январь-декабрь]
+        okved2: [Всего по обследуемым видам экономической деятельности]
+      scale: 1000
+    catering:
+      section: 2
+      code: Y48401006
+      years: [2024]
+      filters:
+        indicator_period: [Январь-декабрь]
+        okved2: [Всего по обследуемым видам экономической деятельности]
+      scale: 1000
+    housing:
+      section: 37
+      code: Y48010001
+      years: [2023, 2024]
+      scale: 1000
+    investment:
+      section: 9
+      code: Y48109001
+      years: [2023]
+      filters:
+        okved2: [Всего по обследуемым видам экономической деятельности]
+        istinv: [Всего]
+      scale: 1000
+    hotel_beds:
+      section: 60
+      code: Y48060002
+      years: [2023, 2024]
+      scale: 1000
+
+four_russias:
+  city_types: [городской округ, город федерального значения]
+  big_city: 250000
+  middle_city: 20000
+  fourth_region_codes: [4, 5, 6, 7, 9, 15, 17, 20]
+
 prices:
   years: [2022, 2023, 2024]
   regions:
