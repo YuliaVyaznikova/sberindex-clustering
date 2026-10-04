@@ -24,6 +24,7 @@ python run.py track
 python run.py robustness
 python run.py describe
 python run.py validate
+python run.py synthetic
 ```
 
 | Шаг | Что делает | Результат |
@@ -35,6 +36,7 @@ python run.py validate
 | `robustness` | проверяет устойчивость типов к параметрам и составу МО, около 50 минут | `results` |
 | `describe` | описание типов, изменения, проверка индексом мобильности, расхождение трат и местной экономики, помесячные переходы, маркетплейсы, карты и графики, около минуты | `results`, `results/figures` |
 | `validate` | проверяет типы: признаки, сеть, мосты между типами, согласие методов, внешняя проверка по Росстату и «Четырём Россиям», устойчивость, ранжирование методов, около 20 минут | `results`, `results/figures` |
+| `synthetic` | проверяет методы на синтетических данных с известными типами, около 20 минут | `results`, `results/figures` |
 
 Таблицы Росстата (в том числе показатели для внешней проверки типов), цены по регионам и справочник МО уже лежат в `data/prepared`. Чтобы пересобрать их из первоисточников (ещё около 5 ГБ загрузок), есть `python run.py download --all` и `python run.py prepare`, подробности в [docs/data.md](docs/data.md).
 
@@ -57,6 +59,7 @@ python -m pytest
 - [docs/economy.md](docs/economy.md) что типы говорят об экономике
 - [docs/robustness.md](docs/robustness.md) устойчивость результатов
 - [docs/validation.md](docs/validation.md) проверка результатов
+- [docs/synthetic.md](docs/synthetic.md) проверка на синтетических данных
 
 ## Структура
 
@@ -77,6 +80,7 @@ python -m pytest
 - `src/describe.py` описание типов и графики
 - `src/economy.py` расхождение трат и экономики, помесячные переходы, маркетплейсы
 - `src/validate.py` проверка результатов
+- `src/synthetic.py` синтетические данные с известными типами
 - `src/api.py` загрузка данных через API СберИндекса
 - `src/remote.py` чтение файлов из zip-архива на сервере без скачивания архива
 - `tests` тесты

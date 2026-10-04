@@ -166,6 +166,13 @@ validate:
   consensus_alphas: [0.3, 0.5]
   bridge_participation: 0.62
 
+synthetic:
+  repeats: 5
+  noise: 1.5
+  inside_share: 0.8
+  alphas: [0.0, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0]
+  seed: 0
+
 robustness:
   runs: 300
   share: 0.9
