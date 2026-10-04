@@ -11,6 +11,7 @@ from matplotlib.path import Path as CurvePath
 from scipy.stats import kruskal
 
 from .download import FILES
+from .economy import catch_up, marketplaces, monthly_transitions, plot_gap, plot_marketplaces, plot_monthly, spending_gap
 from .network import BLOCKS, CITIES, load_data, transform
 
 SURFACE, INK, MUTED, GRID, BACKGROUND = "#fcfcfb", "#0b0b0b", "#52514e", "#e6e5e0", "#ebeae5"
@@ -396,7 +397,24 @@ def describe(config):
     approaches = out / "dynamics_approaches.csv"
     if approaches.exists():
         plot_dynamics(pd.read_csv(approaches), figures / "dynamics_approaches.png")
+
+    colors = {"background": "#f1f0ec", "edge": "#dcdbd5", "surface": SURFACE, "muted": MUTED}
+    gap, r2 = spending_gap(features, territories, types, last)
+    gap.assign(type=gap["type"].map(palette["names"])).round(4).to_csv(out / "spending_gap.csv")
+    plot_gap(shapes, gap, r2, last, colors, figures / "spending_gap_map.png")
+    monthly = pd.read_parquet(config["paths"]["processed"] / "spending_monthly.parquet")
+    k = config["model"]["k"]
+    shares, summary, seasonality = monthly_transitions(monthly, original, k)
+    shares.round(4).to_csv(out / "monthly_changes.csv")
+    summary.assign(**seasonality).round(4).to_csv(out / "monthly_summary.csv", index=False)
+    plot_monthly(shares, k, seasonality["municipalities"], colors, figures / "monthly_changes.png")
+    market, rubles, count = marketplaces(monthly, types, last)
+    catch_up(market, rubles, palette["order"][0]).rename(index=palette["short"]).round(3).to_csv(out / "marketplaces.csv")
+    plot_marketplaces(market, palette, count, last, colors, figures / "marketplaces.png")
     with pd.option_context("display.width", 250, "display.max_columns", 30):
         print(passport.join(names).round(3).to_string())
     print(f"mobility check: H = {statistic:.1f}, p = {p_value:.2g}, {len(shown)} municipalities")
+    print(f"spending level from the local economy: out-of-fold R2 {r2:.3f}; spend 15% or more above the forecast: {(gap['gap'] >= 0.15).sum()}, below: {(gap['gap'] <= -0.15).sum()}")
+    print(summary.round(3).to_string(index=False))
+    print({name: round(float(value), 3) for name, value in seasonality.items()})
     print(f"tables in {out}, figures in {figures}")
