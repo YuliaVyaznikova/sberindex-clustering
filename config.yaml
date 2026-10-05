@@ -167,6 +167,7 @@ validate:
   stability_ks: [3, 4, 5, 6, 7, 8, 9, 10]
   consensus_alphas: [0.3, 0.5]
   bridge_participation: 0.62
+  refine_weights: [0.0, 0.3, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
 synthetic:
   repeats: 5
@@ -174,6 +175,8 @@ synthetic:
   inside_share: 0.8
   alphas: [0.0, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0]
   seed: 0
+  truths: [model, kmeans, spectral]
+  truth_scenarios: [calibrated, pairs_by_spending]
 
 robustness:
   runs: 300

@@ -37,15 +37,32 @@ SHOWN = [
 INDICES = ["SW", "CH", "S_Dbw", "DB", "AVI", "AVU", "MQ", "within"]
 
 
-def real_types(config):
+def window(config):
     period = config["compare"]["period"]
     shot = snapshot(config, load_data(config), period)
     types = pd.read_csv(config["paths"]["results"] / "types.csv")
     labels = types[types["period"] == period].set_index("territory_id")["type"].reindex(shot["ids"])
     keep = labels.notna().to_numpy()
-    x, y = shot["x"][keep], labels[keep].astype(int).to_numpy()
-    centers = np.array([x[y == c].mean(axis=0) for c in range(y.max() + 1)])
-    return x, y, centers
+    return shot, keep, labels[keep].astype(int).to_numpy()
+
+
+def type_centers(x, y):
+    return np.array([x[y == c].mean(axis=0) for c in range(y.max() + 1)])
+
+
+def real_types(config):
+    shot, keep, y = window(config)
+    x = shot["x"][keep]
+    return x, y, type_centers(x, y)
+
+
+def truth_types(config, source):
+    if source == "model":
+        return real_types(config)
+    shot, keep, y = window(config)
+    x, k = shot["x"][keep], y.max() + 1
+    y = methods.kmeans(x, k) if source == "kmeans" else methods.spectral(shot["graph"][keep][:, keep], k)
+    return x, y, type_centers(x, y)
 
 
 def scenario_centers(centers, grand, layout):
@@ -175,3 +192,50 @@ def synthetic(config):
         print(ari.round(3).to_string())
         print("Spearman correlation of each index with ARI across methods:")
         print(correlation.round(2).to_string())
+    check_truths(config)
+
+
+def truth_partitions(config, x, w, wa, k):
+    alpha, weight = config["model"]["alpha"], config["model"]["refine_weight"]
+    result = {name: method(x, k) for name, method in methods.ATTRIBUTE_METHODS.items()}
+    result["spectral"] = methods.spectral(w, k)
+    for name in ("kefrin_euclidean", "kefrin_cosine", "fused_spectral"):
+        result[name] = methods.joint(name, x, w, wa, k, alpha, weight)
+    for value in config["validate"]["refine_weights"]:
+        result[f"refined_spectral w{value}"] = methods.refined_spectral(x, w, wa, k, alpha, value)
+    return result
+
+
+def check_truths(config):
+    out = config["paths"]["results"]
+    settings = config["synthetic"]
+    reference = f"refined_spectral w{config['model']['refine_weight']}"
+    scenarios = list(SCENARIOS)
+    rows = []
+    for position, source in enumerate(settings["truths"]):
+        x, y, centers = truth_types(config, source)
+        residuals = x - centers[y]
+        sizes = np.bincount(y)
+        for name in settings["truth_scenarios"]:
+            number = scenarios.index(name)
+            for repeat in range(settings["repeats"]):
+                start = time.time()
+                seed = [settings["seed"], number, repeat] + ([] if source == "model" else [position])
+                xs, w, wa, truth = dataset(config, name, centers, residuals, sizes, np.random.default_rng(seed))
+                for method, labels in truth_partitions(config, xs, w, wa, len(sizes)).items():
+                    rows.append({"truth": source, "scenario": name, "repeat": repeat, "method": method, "ari": adjusted_rand_score(truth, labels)})
+                pd.DataFrame(rows).to_csv(out / "synthetic_truths.csv", index=False)
+                print(time.strftime("%H:%M:%S"), f"truth {source}, {name} {repeat}: {time.time() - start:.0f}s", flush=True)
+    table = pd.DataFrame(rows)
+    ari = table.pivot_table(index="method", columns=["truth", "scenario"], values="ari", aggfunc="mean")
+    ari = ari[[(t, s) for t in settings["truths"] for s in settings["truth_scenarios"]]]
+    ari.columns = [f"{t} {s}" for t, s in ari.columns]
+    ari.round(4).to_csv(out / "synthetic_truths_ari.csv")
+    with pd.option_context("display.width", 250):
+        print("ARI with the true types from other methods, mean over repeats (columns: truth source and scenario):")
+        print(ari.round(3).to_string())
+        print(f"repeats in which {reference} beats the method:")
+        for (source, name), part in table.groupby(["truth", "scenario"], sort=False):
+            wide = part.pivot(index="repeat", columns="method", values="ari")
+            wins = {m: int((wide[reference] > wide[m]).sum()) for m in wide.columns if m != reference}
+            print(f"{source} {name} (of {len(wide)}):", wins)

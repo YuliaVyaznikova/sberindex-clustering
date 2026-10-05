@@ -22,6 +22,7 @@ from . import methods
 from .compare import agreement, subsamples
 from .describe import INK, MUTED, PROFILE, style
 from .features import load_territories, match, read_prepared
+from .metrics import panel
 from .network import BLOCKS, load_data, snapshot, transform
 
 LABELS = {
@@ -311,6 +312,43 @@ def check_stability(config, x, w, wa, best):
     return pd.DataFrame(rows)
 
 
+def check_refinement(config, x, w, wa, table, rng):
+    settings, model = config["validate"], config["model"]
+    alpha, k = model["alpha"], model["k"]
+    samples = subsamples(len(x), {"seed": settings["seed"], "share": settings["share"], "subsamples": settings["stability_runs"]})
+    existing = table[table["k"] == k]
+    edges = {name: np.percentile(existing[name] * direction, [100 / 3, 200 / 3]) for name, direction in INDICES.items()}
+    everyone = np.arange(len(x))
+    fused = methods.fused_spectral(w, wa, k, alpha)
+    chosen = methods.refined_spectral(x, w, wa, k, alpha, model["refine_weight"])
+    rows = []
+    for weight in list(settings["refine_weights"]) + [np.nan]:
+        if np.isnan(weight):
+            name = "fused_spectral"
+            labels = fused
+            run = lambda keep, seed: methods.fused_spectral(w[keep][:, keep], wa[keep][:, keep], k, alpha, seed)
+        else:
+            name = f"refined_spectral w{weight}"
+            labels = methods.refined_spectral(x, w, wa, k, alpha, weight)
+            run = lambda keep, seed, weight=weight: methods.refined_spectral(x[keep], w[keep][:, keep], wa[keep][:, keep], k, alpha, weight, seed)
+        values = panel(x, w, labels, rng)
+        grades = {}
+        for index, direction in INDICES.items():
+            low, high = edges[index]
+            score = values[index] * direction
+            grades[index] = 1 if score >= high else 2 if score >= low else 3
+        added = pd.DataFrame([{"method": name, "alpha": np.nan, "k": k, "stability": np.nan, **{index: values[index] for index in INDICES}, "within": values["within"]}])
+        place = rank_methods(pd.concat([table, added], ignore_index=True), k).loc[name]
+        scores = agreement(run, labels, samples)
+        rows.append({
+            "weight": weight, **{index: values[index] for index in INDICES}, "within": values["within"],
+            "worst": sum(g == 3 for g in grades.values()), "middle": sum(g == 2 for g in grades.values()),
+            "place": place["place"], "borda": place["borda"], "stability": scores.mean(), "stability_p5": np.percentile(scores, 5),
+            "ari_with_fused": adjusted_rand_score(fused, labels), "ari_with_model": adjusted_rand_score(chosen, labels),
+        })
+    return pd.DataFrame(rows)
+
+
 def label(name, alpha):
     return name if np.isnan(alpha) else f"{name} {alpha:.1f}"
 
@@ -478,4 +516,9 @@ def validate(config):
     best.round(4).to_csv(out / "validate_ranking_methods.csv")
     print("best configuration of each method by the threshold rule, with stability on the validate subsamples:")
     print(best.round(3).to_string(), flush=True)
+    refinement = check_refinement(config, x, w, wa, pd.read_csv(out / "methods.csv"), rng)
+    refinement.round(4).to_csv(out / "validate_refinement.csv", index=False)
+    print("sensitivity of the refinement weight (the last row has no refinement):")
+    with pd.option_context("display.width", 250):
+        print(refinement.round(3).to_string(index=False), flush=True)
     print(f"validate {time.time() - start:.0f}s")
