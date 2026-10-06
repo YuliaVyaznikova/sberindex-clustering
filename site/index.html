@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Типы местных экономик России</title>
+<meta name="description" content="Атлас шести типов местных экономик 1867 муниципальных образований России по данным СберИндекса и Росстата, 2023-2024. Карта, сеть трат, похожие муниципалитеты, смены типа.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <canvas id="hero-net" aria-hidden="true"></canvas>
+  <div class="wrap hero-text">
+    <span class="pill">СберИндекс 2026, «Кластеризация»</span>
+    <h1>Типы местных экономик России</h1>
+    <p class="lead">кластеризация муниципалитетов по тратам жителей и устройству местной экономики, 2023-2024</p>
+    <p class="links">
+      <a href="https://github.com/YuliaVyaznikova/sberindex-clustering">код и данные</a>
+      <a href="https://github.com/YuliaVyaznikova/sberindex-clustering/blob/main/docs/report.md">методологический отчёт</a>
+      <a href="https://github.com/YuliaVyaznikova/sberindex-clustering/blob/main/docs/presentation.pdf">презентация</a>
+    </p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="tiles" id="tiles" aria-label="Ключевые результаты"></section>
+  <p class="plate">типы подтверждаются данными, которых метод не видел, все 65 крупных городов из «Четырёх Россий» Н. Зубаревич попали в тип «Города», а индекс покупательской мобильности СберИндекса сильно различается между типами (p = 6e-18)</p>
+
+  <section id="map-section">
+    <h2>Карта типов и похожие муниципалитеты</h2>
+    <p class="intro">выберите муниципальное образование (МО) на карте, в сети ниже или через поиск, линии на карте ведут к 10 МО с самой похожей структурой трат</p>
+    <div class="controls">
+      <div class="group">
+        <span class="group-label">период, 12 месяцев подряд</span>
+        <div class="seg" id="periods"></div>
+      </div>
+      <div class="group">
+        <span class="group-label">цвет</span>
+        <div class="seg" id="modes">
+          <button data-mode="type" class="on">тип</button>
+          <button data-mode="confidence">уверенность</button>
+          <button data-mode="change">смена типа</button>
+        </div>
+      </div>
+      <div class="search">
+        <input id="search" type="search" placeholder="найти МО" autocomplete="off" aria-label="Поиск муниципального образования">
+        <ul id="results" hidden></ul>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="map-layout">
+      <div class="map-box" id="map-box">
+        <svg id="map" role="img" aria-label="Карта типов муниципальных образований"></svg>
+        <div class="zoom">
+          <button id="zoom-in" aria-label="Приблизить">+</button>
+          <button id="zoom-out" aria-label="Отдалить">-</button>
+          <button id="zoom-reset" aria-label="Сбросить масштаб">⌂</button>
+        </div>
+        <div class="scale" id="scale"></div>
+      </div>
+      <div class="passport-wrap"><aside class="passport" id="passport" aria-live="polite"></aside></div>
+    </div>
+    <p class="note">приближение колесом мыши с клавишей Ctrl, перетаскиванием и кнопками, тёмно-серым показаны МО без трат за все 12 месяцев периода, районы Москвы и Санкт-Петербурга объединены в два МО</p>
+  </section>
+
+  <section id="network-section">
+    <h2>Сеть трат в 2024 году</h2>
+    <p class="intro">точка это МО, цвет это его тип, ребро ведёт к МО с похожей структурой трат, наведите курсор на точку, чтобы увидеть её соседей</p>
+    <div class="net-layout">
+      <div class="net-box"><canvas id="net"></canvas></div>
+      <div class="net-side" id="net-side"></div>
+    </div>
+  </section>
+
+  <section id="cards-section">
+    <h2>Чем типы отличаются</h2>
+    <p class="intro">типичные значения признаков в 2024 году и медианы показателей Росстата, которых не было в модели, стрелка вверх значит, что у типа признак выше, чем у остальных</p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section id="flow-section">
+    <h2>Смены типа за 2024 год</h2>
+    <div class="tiles three" id="flow-tiles"></div>
+    <div class="flow-layout">
+      <div>
+        <h3>самые частые смены типа</h3>
+        <div id="flows"></div>
+        <p class="side-note">в города переходят МО ближе к столицам регионов, медиана 60 км против 107 км у всех МО</p>
+        <p class="side-note">если строить типы по каждому месяцу, их меняют 22% МО в месяц, и 44% таких смен откатываются за два месяца, это сезонность, поэтому мы считаем типы по 12 месяцам подряд</p>
+      </div>
+      <div>
+        <h3>все переходы, строки это тип в 2023 году, столбцы тип в 2024 году</h3>
+        <div class="chart" id="matrix"></div>
+      </div>
+    </div>
+    <details class="moves">
+      <summary id="moves-title"></summary>
+      <div id="moves"></div>
+    </details>
+  </section>
+
+  <section id="spend-section">
+    <h2>Что изменилось в тратах за год</h2>
+    <p class="intro">медиана изменения по МО каждого типа, 2024 год против 2023 года</p>
+    <div class="table-wrap" id="changes"></div>
+    <div class="two">
+      <p>сильнее всего выросла доля маркетплейсов, на 3.3-4.9 п.п. в каждом типе, доли еды и прочих трат снизились на 1.5-2.2 п.п., остальные почти не изменились</p>
+      <p>уровень трат вырос только в городах (+1.8%) и на Кавказе (+2.6%), в остальных типах снизился, то есть разрыв по уровню трат растёт</p>
+    </div>
+    <h3>доля маркетплейсов по месяцам, медиана по МО типа</h3>
+    <div class="key" id="market-key"></div>
+    <div class="chart" id="market"></div>
+    <p class="side-note">на стареющей периферии и Кавказе доля маркетплейсов выше, чем в городах, и за год разрыв не сократился, быстрее всех догоняют удалённые территории, с 0.63 до 0.78 уровня городов</p>
+  </section>
+
+  <section id="model-section">
+    <h2>Метод SPECTRA и его качество</h2>
+    <p class="intro">SPECTRA (SPECtral Typology with Refinement for Attributed networks) это собственная двухэтапная схема, совместная спектральная кластеризация графа трат и графа признаков (вес графа α = 0.3), затем один шаг уточнения границ по признакам и связям (вес графа w = 0.7), этапы опираются на статьи, код написан нами</p>
+    <div class="charts">
+      <figure>
+        <figcaption>все 83 варианта методов, данные 2024 года, 6 типов</figcaption>
+        <div class="key" id="scatter-key"></div>
+        <div class="chart" id="scatter"></div>
+        <p class="side-note">методы по признакам сильны в признаках и слабы на графе, методы по графу наоборот, SPECTRA лучше k-means по SW, AVI, AVU и MQ</p>
+      </figure>
+      <figure>
+        <figcaption>точность на синтетических данных с известными типами, худший из трёх случаев</figcaption>
+        <div class="chart" id="bars"></div>
+        <p class="side-note">правильные типы берутся по очереди из SPECTRA, k-means и спектральной кластеризации по графу, каждый метод лучше всех находит свои типы, поэтому сравниваем худший случай, и даже в нём SPECTRA точнее остальных</p>
+      </figure>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p><b>данные</b> СберИндекс, пакет данных конкурса (CC BY-SA 4.0), Росстат в обработке проекта «Точно» (CC BY 4.0), ЕМИСС, стоимость фиксированного набора товаров и услуг, границы МО из справочника СберИндекса</p>
+    <p><b>код</b> <a href="https://github.com/YuliaVyaznikova/sberindex-clustering">github.com/YuliaVyaznikova/sberindex-clustering</a>, лицензия MIT, таблицы из данных СберИндекса распространяются по CC BY-SA 4.0</p>
+  </div>
+</footer>
+
+<div class="tip" id="tip" hidden></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
