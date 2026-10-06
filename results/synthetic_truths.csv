@@ -1,0 +1,451 @@
+truth,scenario,repeat,method,ari
+model,calibrated,0,kmeans,0.5521626520509827
+model,calibrated,0,ward,0.44705272392345363
+model,calibrated,0,gmm,0.4731766987969001
+model,calibrated,0,spectral,0.43142275839712557
+model,calibrated,0,kefrin_euclidean,0.5342046273423715
+model,calibrated,0,kefrin_cosine,0.5200005242441031
+model,calibrated,0,fused_spectral,0.559374777306779
+model,calibrated,0,refined_spectral w0.0,0.6058318952506704
+model,calibrated,0,refined_spectral w0.3,0.6123761376380175
+model,calibrated,0,refined_spectral w0.5,0.6199107034616711
+model,calibrated,0,refined_spectral w0.6,0.6263579366001766
+model,calibrated,0,refined_spectral w0.7,0.6165481405399595
+model,calibrated,0,refined_spectral w0.8,0.6059600575973318
+model,calibrated,0,refined_spectral w0.9,0.5696665822753593
+model,calibrated,0,refined_spectral w1.0,0.5022157978912964
+model,calibrated,1,kmeans,0.6435704052519408
+model,calibrated,1,ward,0.5269014590439585
+model,calibrated,1,gmm,0.5162648828065816
+model,calibrated,1,spectral,0.48638269280994223
+model,calibrated,1,kefrin_euclidean,0.6458491388675696
+model,calibrated,1,kefrin_cosine,0.5446004373095416
+model,calibrated,1,fused_spectral,0.643539491456499
+model,calibrated,1,refined_spectral w0.0,0.6503220574269147
+model,calibrated,1,refined_spectral w0.3,0.6640873843129517
+model,calibrated,1,refined_spectral w0.5,0.6732190925891774
+model,calibrated,1,refined_spectral w0.6,0.6838870705395326
+model,calibrated,1,refined_spectral w0.7,0.6806070268122668
+model,calibrated,1,refined_spectral w0.8,0.6768381235813572
+model,calibrated,1,refined_spectral w0.9,0.6527320517025288
+model,calibrated,1,refined_spectral w1.0,0.5687757499040029
+model,calibrated,2,kmeans,0.5636261393490385
+model,calibrated,2,ward,0.547492034740793
+model,calibrated,2,gmm,0.49601188535740887
+model,calibrated,2,spectral,0.43891284676640147
+model,calibrated,2,kefrin_euclidean,0.5477851819684889
+model,calibrated,2,kefrin_cosine,0.5026334710439058
+model,calibrated,2,fused_spectral,0.6178063417185159
+model,calibrated,2,refined_spectral w0.0,0.6527898434096374
+model,calibrated,2,refined_spectral w0.3,0.6609427909074553
+model,calibrated,2,refined_spectral w0.5,0.6608508431226866
+model,calibrated,2,refined_spectral w0.6,0.6623004147256687
+model,calibrated,2,refined_spectral w0.7,0.6676062471479629
+model,calibrated,2,refined_spectral w0.8,0.6583073004686661
+model,calibrated,2,refined_spectral w0.9,0.6530685681800097
+model,calibrated,2,refined_spectral w1.0,0.5595996734332411
+model,calibrated,3,kmeans,0.6286909430986515
+model,calibrated,3,ward,0.5323116661563416
+model,calibrated,3,gmm,0.5318843799863467
+model,calibrated,3,spectral,0.45482831621177844
+model,calibrated,3,kefrin_euclidean,0.5690909243365556
+model,calibrated,3,kefrin_cosine,0.5200267852860817
+model,calibrated,3,fused_spectral,0.6891337806167048
+model,calibrated,3,refined_spectral w0.0,0.7260053619686027
+model,calibrated,3,refined_spectral w0.3,0.7325978371760022
+model,calibrated,3,refined_spectral w0.5,0.7426361279671697
+model,calibrated,3,refined_spectral w0.6,0.7516850087541069
+model,calibrated,3,refined_spectral w0.7,0.742105093329457
+model,calibrated,3,refined_spectral w0.8,0.7468221704982357
+model,calibrated,3,refined_spectral w0.9,0.7274580816613972
+model,calibrated,3,refined_spectral w1.0,0.656019802856476
+model,calibrated,4,kmeans,0.5662071204838369
+model,calibrated,4,ward,0.4922684626525362
+model,calibrated,4,gmm,0.49493366233947494
+model,calibrated,4,spectral,0.4390301529523844
+model,calibrated,4,kefrin_euclidean,0.5665405908466492
+model,calibrated,4,kefrin_cosine,0.5300039044502556
+model,calibrated,4,fused_spectral,0.5814207018839425
+model,calibrated,4,refined_spectral w0.0,0.6208318971694784
+model,calibrated,4,refined_spectral w0.3,0.6246652109091559
+model,calibrated,4,refined_spectral w0.5,0.6298344020414975
+model,calibrated,4,refined_spectral w0.6,0.6375706369028968
+model,calibrated,4,refined_spectral w0.7,0.637055327322806
+model,calibrated,4,refined_spectral w0.8,0.6307156687904967
+model,calibrated,4,refined_spectral w0.9,0.6043867967287406
+model,calibrated,4,refined_spectral w1.0,0.5412634995826604
+model,pairs_by_spending,0,kmeans,0.7001683190482648
+model,pairs_by_spending,0,ward,0.4854632524785393
+model,pairs_by_spending,0,gmm,0.42376676097543686
+model,pairs_by_spending,0,spectral,0.41216048824624546
+model,pairs_by_spending,0,kefrin_euclidean,0.6979824149938177
+model,pairs_by_spending,0,kefrin_cosine,0.5761015760627717
+model,pairs_by_spending,0,fused_spectral,0.6973244358911052
+model,pairs_by_spending,0,refined_spectral w0.0,0.7162281599002337
+model,pairs_by_spending,0,refined_spectral w0.3,0.723939576000176
+model,pairs_by_spending,0,refined_spectral w0.5,0.7316988954327027
+model,pairs_by_spending,0,refined_spectral w0.6,0.7377759722248584
+model,pairs_by_spending,0,refined_spectral w0.7,0.7440151979083013
+model,pairs_by_spending,0,refined_spectral w0.8,0.744261993291502
+model,pairs_by_spending,0,refined_spectral w0.9,0.7385875163908755
+model,pairs_by_spending,0,refined_spectral w1.0,0.5983649713868618
+model,pairs_by_spending,1,kmeans,0.7137530461206706
+model,pairs_by_spending,1,ward,0.6343333885266467
+model,pairs_by_spending,1,gmm,0.3816295529511758
+model,pairs_by_spending,1,spectral,0.44982256146731525
+model,pairs_by_spending,1,kefrin_euclidean,0.7199496271569436
+model,pairs_by_spending,1,kefrin_cosine,0.6025987738719163
+model,pairs_by_spending,1,fused_spectral,0.7811667729257183
+model,pairs_by_spending,1,refined_spectral w0.0,0.7650678560077572
+model,pairs_by_spending,1,refined_spectral w0.3,0.7788030556055024
+model,pairs_by_spending,1,refined_spectral w0.5,0.7999148181754835
+model,pairs_by_spending,1,refined_spectral w0.6,0.8059247387690706
+model,pairs_by_spending,1,refined_spectral w0.7,0.8057131903164313
+model,pairs_by_spending,1,refined_spectral w0.8,0.8032343482654463
+model,pairs_by_spending,1,refined_spectral w0.9,0.7929344264707331
+model,pairs_by_spending,1,refined_spectral w1.0,0.6706156339397638
+model,pairs_by_spending,2,kmeans,0.5599616366213492
+model,pairs_by_spending,2,ward,0.49221625201537395
+model,pairs_by_spending,2,gmm,0.3617201922340314
+model,pairs_by_spending,2,spectral,0.44124870620218526
+model,pairs_by_spending,2,kefrin_euclidean,0.573223112809577
+model,pairs_by_spending,2,kefrin_cosine,0.5705179294581982
+model,pairs_by_spending,2,fused_spectral,0.7107887632575743
+model,pairs_by_spending,2,refined_spectral w0.0,0.7546275880413292
+model,pairs_by_spending,2,refined_spectral w0.3,0.7566773714794921
+model,pairs_by_spending,2,refined_spectral w0.5,0.7591599392187002
+model,pairs_by_spending,2,refined_spectral w0.6,0.7624099051681034
+model,pairs_by_spending,2,refined_spectral w0.7,0.761228837137003
+model,pairs_by_spending,2,refined_spectral w0.8,0.7550811504767383
+model,pairs_by_spending,2,refined_spectral w0.9,0.7359723510307506
+model,pairs_by_spending,2,refined_spectral w1.0,0.6140984275761043
+model,pairs_by_spending,3,kmeans,0.7080294129166275
+model,pairs_by_spending,3,ward,0.5306305626252494
+model,pairs_by_spending,3,gmm,0.41647566780408124
+model,pairs_by_spending,3,spectral,0.455658104175763
+model,pairs_by_spending,3,kefrin_euclidean,0.6693840995693262
+model,pairs_by_spending,3,kefrin_cosine,0.610692531220489
+model,pairs_by_spending,3,fused_spectral,0.7343081177621065
+model,pairs_by_spending,3,refined_spectral w0.0,0.7478911665482437
+model,pairs_by_spending,3,refined_spectral w0.3,0.7553146897510339
+model,pairs_by_spending,3,refined_spectral w0.5,0.7682366479238918
+model,pairs_by_spending,3,refined_spectral w0.6,0.769774826958908
+model,pairs_by_spending,3,refined_spectral w0.7,0.7720267761368853
+model,pairs_by_spending,3,refined_spectral w0.8,0.7744734854925818
+model,pairs_by_spending,3,refined_spectral w0.9,0.7559194711567129
+model,pairs_by_spending,3,refined_spectral w1.0,0.6360340942636985
+model,pairs_by_spending,4,kmeans,0.5738643121864478
+model,pairs_by_spending,4,ward,0.6145041599482907
+model,pairs_by_spending,4,gmm,0.4714066155407138
+model,pairs_by_spending,4,spectral,0.4134354258421139
+model,pairs_by_spending,4,kefrin_euclidean,0.5888614789022781
+model,pairs_by_spending,4,kefrin_cosine,0.7545704730122056
+model,pairs_by_spending,4,fused_spectral,0.7119322740195385
+model,pairs_by_spending,4,refined_spectral w0.0,0.7306872738147883
+model,pairs_by_spending,4,refined_spectral w0.3,0.737624346661288
+model,pairs_by_spending,4,refined_spectral w0.5,0.7447773282482388
+model,pairs_by_spending,4,refined_spectral w0.6,0.7525729525084717
+model,pairs_by_spending,4,refined_spectral w0.7,0.7561775404350495
+model,pairs_by_spending,4,refined_spectral w0.8,0.7580936341530268
+model,pairs_by_spending,4,refined_spectral w0.9,0.7532266755322236
+model,pairs_by_spending,4,refined_spectral w1.0,0.6267308739326956
+kmeans,calibrated,0,kmeans,0.7235819991213379
+kmeans,calibrated,0,ward,0.5427002439541396
+kmeans,calibrated,0,gmm,0.5281986494367201
+kmeans,calibrated,0,spectral,0.3180709549549093
+kmeans,calibrated,0,kefrin_euclidean,0.7255333829161575
+kmeans,calibrated,0,kefrin_cosine,0.5567869833155772
+kmeans,calibrated,0,fused_spectral,0.47403212203432826
+kmeans,calibrated,0,refined_spectral w0.0,0.599558283521372
+kmeans,calibrated,0,refined_spectral w0.3,0.5990353561034976
+kmeans,calibrated,0,refined_spectral w0.5,0.590654112337973
+kmeans,calibrated,0,refined_spectral w0.6,0.576171027147918
+kmeans,calibrated,0,refined_spectral w0.7,0.5675440383496344
+kmeans,calibrated,0,refined_spectral w0.8,0.5380603432059224
+kmeans,calibrated,0,refined_spectral w0.9,0.5018240866385862
+kmeans,calibrated,0,refined_spectral w1.0,0.41771357315915675
+kmeans,calibrated,1,kmeans,0.7469623854156153
+kmeans,calibrated,1,ward,0.45600592281235747
+kmeans,calibrated,1,gmm,0.45988128424476427
+kmeans,calibrated,1,spectral,0.3359074975489692
+kmeans,calibrated,1,kefrin_euclidean,0.7479639180287391
+kmeans,calibrated,1,kefrin_cosine,0.5807527608368196
+kmeans,calibrated,1,fused_spectral,0.4516153520888092
+kmeans,calibrated,1,refined_spectral w0.0,0.56274633324854
+kmeans,calibrated,1,refined_spectral w0.3,0.5595677926006628
+kmeans,calibrated,1,refined_spectral w0.5,0.5564212199134302
+kmeans,calibrated,1,refined_spectral w0.6,0.5512668771602743
+kmeans,calibrated,1,refined_spectral w0.7,0.5330448000149932
+kmeans,calibrated,1,refined_spectral w0.8,0.5165587963814335
+kmeans,calibrated,1,refined_spectral w0.9,0.4714499311285131
+kmeans,calibrated,1,refined_spectral w1.0,0.3822874950365702
+kmeans,calibrated,2,kmeans,0.7181000465611508
+kmeans,calibrated,2,ward,0.3904410865875617
+kmeans,calibrated,2,gmm,0.491629290710091
+kmeans,calibrated,2,spectral,0.3141569035208904
+kmeans,calibrated,2,kefrin_euclidean,0.7060760355003549
+kmeans,calibrated,2,kefrin_cosine,0.570516392385604
+kmeans,calibrated,2,fused_spectral,0.4312435029381899
+kmeans,calibrated,2,refined_spectral w0.0,0.5560789422064205
+kmeans,calibrated,2,refined_spectral w0.3,0.5477676337850184
+kmeans,calibrated,2,refined_spectral w0.5,0.5392505926248945
+kmeans,calibrated,2,refined_spectral w0.6,0.5279310313029063
+kmeans,calibrated,2,refined_spectral w0.7,0.5087416185940191
+kmeans,calibrated,2,refined_spectral w0.8,0.49198292573304353
+kmeans,calibrated,2,refined_spectral w0.9,0.45156780310750233
+kmeans,calibrated,2,refined_spectral w1.0,0.37306290627210686
+kmeans,calibrated,3,kmeans,0.7351506974813766
+kmeans,calibrated,3,ward,0.4896720572728644
+kmeans,calibrated,3,gmm,0.5001949126910928
+kmeans,calibrated,3,spectral,0.35795592020524464
+kmeans,calibrated,3,kefrin_euclidean,0.7417970840290307
+kmeans,calibrated,3,kefrin_cosine,0.5064421866217681
+kmeans,calibrated,3,fused_spectral,0.4737711985907347
+kmeans,calibrated,3,refined_spectral w0.0,0.5925219850794842
+kmeans,calibrated,3,refined_spectral w0.3,0.5876471980419976
+kmeans,calibrated,3,refined_spectral w0.5,0.5675206680423872
+kmeans,calibrated,3,refined_spectral w0.6,0.5586993548899964
+kmeans,calibrated,3,refined_spectral w0.7,0.5475723852682887
+kmeans,calibrated,3,refined_spectral w0.8,0.5321537860209163
+kmeans,calibrated,3,refined_spectral w0.9,0.4933296810787496
+kmeans,calibrated,3,refined_spectral w1.0,0.4101560477033146
+kmeans,calibrated,4,kmeans,0.7225278937966273
+kmeans,calibrated,4,ward,0.5079678461216199
+kmeans,calibrated,4,gmm,0.495644078003695
+kmeans,calibrated,4,spectral,0.3300676483177203
+kmeans,calibrated,4,kefrin_euclidean,0.7237521859333654
+kmeans,calibrated,4,kefrin_cosine,0.5975068493158944
+kmeans,calibrated,4,fused_spectral,0.5114572206076582
+kmeans,calibrated,4,refined_spectral w0.0,0.6349592501133566
+kmeans,calibrated,4,refined_spectral w0.3,0.6210712079963185
+kmeans,calibrated,4,refined_spectral w0.5,0.6123124472658176
+kmeans,calibrated,4,refined_spectral w0.6,0.6087965309796992
+kmeans,calibrated,4,refined_spectral w0.7,0.6006961207977849
+kmeans,calibrated,4,refined_spectral w0.8,0.5786615399315559
+kmeans,calibrated,4,refined_spectral w0.9,0.5277981843232079
+kmeans,calibrated,4,refined_spectral w1.0,0.4345294199525348
+kmeans,pairs_by_spending,0,kmeans,0.5064553450012247
+kmeans,pairs_by_spending,0,ward,0.3524825731236903
+kmeans,pairs_by_spending,0,gmm,0.4043505853303058
+kmeans,pairs_by_spending,0,spectral,0.3187900049842136
+kmeans,pairs_by_spending,0,kefrin_euclidean,0.4630895186312714
+kmeans,pairs_by_spending,0,kefrin_cosine,0.456314030990196
+kmeans,pairs_by_spending,0,fused_spectral,0.43435989560077354
+kmeans,pairs_by_spending,0,refined_spectral w0.0,0.4971109445057772
+kmeans,pairs_by_spending,0,refined_spectral w0.3,0.495544922256672
+kmeans,pairs_by_spending,0,refined_spectral w0.5,0.4945417983161529
+kmeans,pairs_by_spending,0,refined_spectral w0.6,0.4924521918124091
+kmeans,pairs_by_spending,0,refined_spectral w0.7,0.4856792537847109
+kmeans,pairs_by_spending,0,refined_spectral w0.8,0.4744307232175517
+kmeans,pairs_by_spending,0,refined_spectral w0.9,0.44659531749177883
+kmeans,pairs_by_spending,0,refined_spectral w1.0,0.365885981294253
+kmeans,pairs_by_spending,1,kmeans,0.5173910854797954
+kmeans,pairs_by_spending,1,ward,0.41064925917498063
+kmeans,pairs_by_spending,1,gmm,0.4061217705971799
+kmeans,pairs_by_spending,1,spectral,0.34862020151183043
+kmeans,pairs_by_spending,1,kefrin_euclidean,0.5146369970582985
+kmeans,pairs_by_spending,1,kefrin_cosine,0.4568777699857408
+kmeans,pairs_by_spending,1,fused_spectral,0.4363032913088036
+kmeans,pairs_by_spending,1,refined_spectral w0.0,0.49783571076700256
+kmeans,pairs_by_spending,1,refined_spectral w0.3,0.49754019763308815
+kmeans,pairs_by_spending,1,refined_spectral w0.5,0.4983921651710758
+kmeans,pairs_by_spending,1,refined_spectral w0.6,0.4932255171847106
+kmeans,pairs_by_spending,1,refined_spectral w0.7,0.4847137324285594
+kmeans,pairs_by_spending,1,refined_spectral w0.8,0.4737159497593745
+kmeans,pairs_by_spending,1,refined_spectral w0.9,0.4501850745855364
+kmeans,pairs_by_spending,1,refined_spectral w1.0,0.3903929076160197
+kmeans,pairs_by_spending,2,kmeans,0.4910054229563208
+kmeans,pairs_by_spending,2,ward,0.40230920463551606
+kmeans,pairs_by_spending,2,gmm,0.28688951095033083
+kmeans,pairs_by_spending,2,spectral,0.30634973111849756
+kmeans,pairs_by_spending,2,kefrin_euclidean,0.5024324475629979
+kmeans,pairs_by_spending,2,kefrin_cosine,0.4459928623383415
+kmeans,pairs_by_spending,2,fused_spectral,0.4285164519668474
+kmeans,pairs_by_spending,2,refined_spectral w0.0,0.4921344518984381
+kmeans,pairs_by_spending,2,refined_spectral w0.3,0.492023093350949
+kmeans,pairs_by_spending,2,refined_spectral w0.5,0.4886761944628292
+kmeans,pairs_by_spending,2,refined_spectral w0.6,0.48857981937006034
+kmeans,pairs_by_spending,2,refined_spectral w0.7,0.47978342165527493
+kmeans,pairs_by_spending,2,refined_spectral w0.8,0.47341508443582114
+kmeans,pairs_by_spending,2,refined_spectral w0.9,0.4534929644523182
+kmeans,pairs_by_spending,2,refined_spectral w1.0,0.385393197767093
+kmeans,pairs_by_spending,3,kmeans,0.49223485436183534
+kmeans,pairs_by_spending,3,ward,0.38848972913909857
+kmeans,pairs_by_spending,3,gmm,0.3484499657587575
+kmeans,pairs_by_spending,3,spectral,0.32867576619282474
+kmeans,pairs_by_spending,3,kefrin_euclidean,0.48295347152837664
+kmeans,pairs_by_spending,3,kefrin_cosine,0.4449364446107887
+kmeans,pairs_by_spending,3,fused_spectral,0.4378878935462523
+kmeans,pairs_by_spending,3,refined_spectral w0.0,0.4961046539163992
+kmeans,pairs_by_spending,3,refined_spectral w0.3,0.4967401944433555
+kmeans,pairs_by_spending,3,refined_spectral w0.5,0.4921340199821652
+kmeans,pairs_by_spending,3,refined_spectral w0.6,0.48895801035142017
+kmeans,pairs_by_spending,3,refined_spectral w0.7,0.48506123746711544
+kmeans,pairs_by_spending,3,refined_spectral w0.8,0.4754223034542864
+kmeans,pairs_by_spending,3,refined_spectral w0.9,0.454934250936075
+kmeans,pairs_by_spending,3,refined_spectral w1.0,0.3793256878856144
+kmeans,pairs_by_spending,4,kmeans,0.5272535938259569
+kmeans,pairs_by_spending,4,ward,0.38196774748203266
+kmeans,pairs_by_spending,4,gmm,0.35642068232958846
+kmeans,pairs_by_spending,4,spectral,0.31837678170816425
+kmeans,pairs_by_spending,4,kefrin_euclidean,0.5243956178601541
+kmeans,pairs_by_spending,4,kefrin_cosine,0.4434174934742397
+kmeans,pairs_by_spending,4,fused_spectral,0.43374589161412114
+kmeans,pairs_by_spending,4,refined_spectral w0.0,0.5123721442466739
+kmeans,pairs_by_spending,4,refined_spectral w0.3,0.5025806959170014
+kmeans,pairs_by_spending,4,refined_spectral w0.5,0.49804869923159584
+kmeans,pairs_by_spending,4,refined_spectral w0.6,0.4922639487577775
+kmeans,pairs_by_spending,4,refined_spectral w0.7,0.4870553153741505
+kmeans,pairs_by_spending,4,refined_spectral w0.8,0.47719826655312214
+kmeans,pairs_by_spending,4,refined_spectral w0.9,0.44241264342001857
+kmeans,pairs_by_spending,4,refined_spectral w1.0,0.37110089648467476
+spectral,calibrated,0,kmeans,0.47336073781859045
+spectral,calibrated,0,ward,0.3396893304404238
+spectral,calibrated,0,gmm,0.3560497179961131
+spectral,calibrated,0,spectral,0.6407580544127888
+spectral,calibrated,0,kefrin_euclidean,0.4833159299026196
+spectral,calibrated,0,kefrin_cosine,0.5288766763925524
+spectral,calibrated,0,fused_spectral,0.5628872957023816
+spectral,calibrated,0,refined_spectral w0.0,0.5300143974238135
+spectral,calibrated,0,refined_spectral w0.3,0.5474768343338686
+spectral,calibrated,0,refined_spectral w0.5,0.5692997012085003
+spectral,calibrated,0,refined_spectral w0.6,0.5816771923637731
+spectral,calibrated,0,refined_spectral w0.7,0.5934734493321255
+spectral,calibrated,0,refined_spectral w0.8,0.6078767831552302
+spectral,calibrated,0,refined_spectral w0.9,0.6325476359466239
+spectral,calibrated,0,refined_spectral w1.0,0.610194111753175
+spectral,calibrated,1,kmeans,0.44106016861154007
+spectral,calibrated,1,ward,0.35930002405662587
+spectral,calibrated,1,gmm,0.32875424616651716
+spectral,calibrated,1,spectral,0.6552415198911391
+spectral,calibrated,1,kefrin_euclidean,0.4555843208790635
+spectral,calibrated,1,kefrin_cosine,0.5156358997055756
+spectral,calibrated,1,fused_spectral,0.5058583140310124
+spectral,calibrated,1,refined_spectral w0.0,0.46739893107626496
+spectral,calibrated,1,refined_spectral w0.3,0.4767952965531724
+spectral,calibrated,1,refined_spectral w0.5,0.5006267459187886
+spectral,calibrated,1,refined_spectral w0.6,0.5031408674484749
+spectral,calibrated,1,refined_spectral w0.7,0.5208369653027651
+spectral,calibrated,1,refined_spectral w0.8,0.5349580012278651
+spectral,calibrated,1,refined_spectral w0.9,0.5505585942809399
+spectral,calibrated,1,refined_spectral w1.0,0.5600915045457143
+spectral,calibrated,2,kmeans,0.37526086378627327
+spectral,calibrated,2,ward,0.29161854637724866
+spectral,calibrated,2,gmm,0.3154202114121085
+spectral,calibrated,2,spectral,0.6050333617976767
+spectral,calibrated,2,kefrin_euclidean,0.4588876734027212
+spectral,calibrated,2,kefrin_cosine,0.5256548089732294
+spectral,calibrated,2,fused_spectral,0.4104271693596229
+spectral,calibrated,2,refined_spectral w0.0,0.4116120373891859
+spectral,calibrated,2,refined_spectral w0.3,0.42779687598541644
+spectral,calibrated,2,refined_spectral w0.5,0.4412157755403825
+spectral,calibrated,2,refined_spectral w0.6,0.447364368124589
+spectral,calibrated,2,refined_spectral w0.7,0.4522765733676879
+spectral,calibrated,2,refined_spectral w0.8,0.4574853829098377
+spectral,calibrated,2,refined_spectral w0.9,0.4664516664378971
+spectral,calibrated,2,refined_spectral w1.0,0.44354482706975346
+spectral,calibrated,3,kmeans,0.4516373910986018
+spectral,calibrated,3,ward,0.31880856064520974
+spectral,calibrated,3,gmm,0.35771632026456895
+spectral,calibrated,3,spectral,0.6343199890134883
+spectral,calibrated,3,kefrin_euclidean,0.47598125988801177
+spectral,calibrated,3,kefrin_cosine,0.524632235527929
+spectral,calibrated,3,fused_spectral,0.5685548648773758
+spectral,calibrated,3,refined_spectral w0.0,0.5225098776327015
+spectral,calibrated,3,refined_spectral w0.3,0.5365679218102057
+spectral,calibrated,3,refined_spectral w0.5,0.5546586706148077
+spectral,calibrated,3,refined_spectral w0.6,0.5745364871902722
+spectral,calibrated,3,refined_spectral w0.7,0.5861909354009578
+spectral,calibrated,3,refined_spectral w0.8,0.6018470170993445
+spectral,calibrated,3,refined_spectral w0.9,0.6122816835548077
+spectral,calibrated,3,refined_spectral w1.0,0.6201076557145767
+spectral,calibrated,4,kmeans,0.41769311789765484
+spectral,calibrated,4,ward,0.2972001241314725
+spectral,calibrated,4,gmm,0.313614335982842
+spectral,calibrated,4,spectral,0.6053861853272323
+spectral,calibrated,4,kefrin_euclidean,0.4344815175570524
+spectral,calibrated,4,kefrin_cosine,0.48109561516194654
+spectral,calibrated,4,fused_spectral,0.48178946283758
+spectral,calibrated,4,refined_spectral w0.0,0.4718928072264014
+spectral,calibrated,4,refined_spectral w0.3,0.4784122224537447
+spectral,calibrated,4,refined_spectral w0.5,0.4950505089911852
+spectral,calibrated,4,refined_spectral w0.6,0.5046470312776129
+spectral,calibrated,4,refined_spectral w0.7,0.5031507390821023
+spectral,calibrated,4,refined_spectral w0.8,0.5174481026487904
+spectral,calibrated,4,refined_spectral w0.9,0.5269709237250424
+spectral,calibrated,4,refined_spectral w1.0,0.5087420850363376
+spectral,pairs_by_spending,0,kmeans,0.2747502943989814
+spectral,pairs_by_spending,0,ward,0.26069765724181354
+spectral,pairs_by_spending,0,gmm,0.2637513953945529
+spectral,pairs_by_spending,0,spectral,0.6568322166170071
+spectral,pairs_by_spending,0,kefrin_euclidean,0.3510471880667465
+spectral,pairs_by_spending,0,kefrin_cosine,0.35245300903175725
+spectral,pairs_by_spending,0,fused_spectral,0.5150880960320589
+spectral,pairs_by_spending,0,refined_spectral w0.0,0.4893170460250498
+spectral,pairs_by_spending,0,refined_spectral w0.3,0.5094394240330222
+spectral,pairs_by_spending,0,refined_spectral w0.5,0.531991372997806
+spectral,pairs_by_spending,0,refined_spectral w0.6,0.5484985582470223
+spectral,pairs_by_spending,0,refined_spectral w0.7,0.5723945790478205
+spectral,pairs_by_spending,0,refined_spectral w0.8,0.583437969058592
+spectral,pairs_by_spending,0,refined_spectral w0.9,0.5831979140184556
+spectral,pairs_by_spending,0,refined_spectral w1.0,0.5721935058558235
+spectral,pairs_by_spending,1,kmeans,0.3043190749657974
+spectral,pairs_by_spending,1,ward,0.288002871981993
+spectral,pairs_by_spending,1,gmm,0.26607244332742
+spectral,pairs_by_spending,1,spectral,0.6241860473903249
+spectral,pairs_by_spending,1,kefrin_euclidean,0.3445801425084064
+spectral,pairs_by_spending,1,kefrin_cosine,0.5550404280843344
+spectral,pairs_by_spending,1,fused_spectral,0.5682152674887845
+spectral,pairs_by_spending,1,refined_spectral w0.0,0.5688901323113335
+spectral,pairs_by_spending,1,refined_spectral w0.3,0.5832752291839867
+spectral,pairs_by_spending,1,refined_spectral w0.5,0.5873264513561169
+spectral,pairs_by_spending,1,refined_spectral w0.6,0.5885745789527549
+spectral,pairs_by_spending,1,refined_spectral w0.7,0.5947552390320866
+spectral,pairs_by_spending,1,refined_spectral w0.8,0.5968895805268477
+spectral,pairs_by_spending,1,refined_spectral w0.9,0.581921772026073
+spectral,pairs_by_spending,1,refined_spectral w1.0,0.569483479404684
+spectral,pairs_by_spending,2,kmeans,0.3206346381103041
+spectral,pairs_by_spending,2,ward,0.38428437172503005
+spectral,pairs_by_spending,2,gmm,0.30220021682230674
+spectral,pairs_by_spending,2,spectral,0.6645054572318211
+spectral,pairs_by_spending,2,kefrin_euclidean,0.3674964768177589
+spectral,pairs_by_spending,2,kefrin_cosine,0.5722217931857411
+spectral,pairs_by_spending,2,fused_spectral,0.6000611608732078
+spectral,pairs_by_spending,2,refined_spectral w0.0,0.587547615754972
+spectral,pairs_by_spending,2,refined_spectral w0.3,0.6022153440450603
+spectral,pairs_by_spending,2,refined_spectral w0.5,0.6190149931782962
+spectral,pairs_by_spending,2,refined_spectral w0.6,0.63521416793012
+spectral,pairs_by_spending,2,refined_spectral w0.7,0.650138100889962
+spectral,pairs_by_spending,2,refined_spectral w0.8,0.6605288650972121
+spectral,pairs_by_spending,2,refined_spectral w0.9,0.669251803184132
+spectral,pairs_by_spending,2,refined_spectral w1.0,0.6554454180753561
+spectral,pairs_by_spending,3,kmeans,0.283821269625296
+spectral,pairs_by_spending,3,ward,0.2760276101413462
+spectral,pairs_by_spending,3,gmm,0.2830426714385084
+spectral,pairs_by_spending,3,spectral,0.6662873098501918
+spectral,pairs_by_spending,3,kefrin_euclidean,0.25097651105559565
+spectral,pairs_by_spending,3,kefrin_cosine,0.3760083693570134
+spectral,pairs_by_spending,3,fused_spectral,0.4974869542050661
+spectral,pairs_by_spending,3,refined_spectral w0.0,0.46702527690945234
+spectral,pairs_by_spending,3,refined_spectral w0.3,0.48736110225514284
+spectral,pairs_by_spending,3,refined_spectral w0.5,0.5061986638202838
+spectral,pairs_by_spending,3,refined_spectral w0.6,0.5246104064977837
+spectral,pairs_by_spending,3,refined_spectral w0.7,0.5444921844409005
+spectral,pairs_by_spending,3,refined_spectral w0.8,0.5557796895245439
+spectral,pairs_by_spending,3,refined_spectral w0.9,0.5664360489694747
+spectral,pairs_by_spending,3,refined_spectral w1.0,0.5534014679875412
+spectral,pairs_by_spending,4,kmeans,0.27390653104448287
+spectral,pairs_by_spending,4,ward,0.24874994747915077
+spectral,pairs_by_spending,4,gmm,0.2675230499992789
+spectral,pairs_by_spending,4,spectral,0.614060208091675
+spectral,pairs_by_spending,4,kefrin_euclidean,0.3010021184174829
+spectral,pairs_by_spending,4,kefrin_cosine,0.4040910284164337
+spectral,pairs_by_spending,4,fused_spectral,0.4568934014587382
+spectral,pairs_by_spending,4,refined_spectral w0.0,0.4224596610958243
+spectral,pairs_by_spending,4,refined_spectral w0.3,0.4400210998899533
+spectral,pairs_by_spending,4,refined_spectral w0.5,0.4546973869840876
+spectral,pairs_by_spending,4,refined_spectral w0.6,0.464588179126761
+spectral,pairs_by_spending,4,refined_spectral w0.7,0.4722329091646643
+spectral,pairs_by_spending,4,refined_spectral w0.8,0.4822000533078651
+spectral,pairs_by_spending,4,refined_spectral w0.9,0.48813024373524055
+spectral,pairs_by_spending,4,refined_spectral w1.0,0.47576539225669046

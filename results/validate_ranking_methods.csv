@@ -1,0 +1,14 @@
+,SW,CH,S_Dbw,AVI,AVU,MQ,method,alpha,worst,middle,best,borda,within,stability,place,stability_runs
+refined_spectral 0.2,1,1,2,2,1,2,refined_spectral,0.2,0,3,3,361.0,0.7718,,1,0.8917
+kefrin_euclidean 0.6,1,1,2,2,1,2,kefrin_euclidean,0.6,0,3,3,312.0,0.6694,,1,0.8224
+dmon 0.4,2,2,1,2,2,2,dmon,0.4,0,5,1,280.0,0.741,,11,0.5924
+kefrin_cosine 0.7,2,2,1,1,3,1,kefrin_cosine,0.7,1,2,3,289.0,0.809,,14,0.5372
+fused_spectral 0.2,1,2,3,2,1,2,fused_spectral,0.2,1,3,2,304.0,0.7799,,16,0.8795
+canus_cosine 0.4,2,2,1,2,3,2,canus_cosine,0.4,1,4,1,253.0,0.6939,,23,0.6943
+canus_euclidean 0.6,2,2,1,3,2,2,canus_euclidean,0.6,1,4,1,231.0,0.6661,,23,0.4305
+kmeans,1,1,2,3,1,3,kmeans,,2,1,3,301.0,0.6245,0.901,31,0.914
+louvain,3,3,3,1,2,1,louvain,,3,1,2,233.0,0.8992,0.6864,55,0.6124
+leiden,3,3,3,1,2,1,leiden,,3,1,2,228.0,0.8891,0.6651,55,0.6272
+spectral,3,3,3,1,2,1,spectral,,3,1,2,221.0,0.8707,0.8382,55,0.8046
+ward,2,2,3,3,1,3,ward,,3,2,1,177.0,0.5853,0.4328,68,0.4366
+gmm,3,3,3,3,1,3,gmm,,5,0,1,79.0,0.5159,0.5231,83,0.526

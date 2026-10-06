@@ -1,0 +1,84 @@
+,SW,CH,S_Dbw,AVI,AVU,MQ,method,alpha,worst,middle,best,borda,within,stability,place
+refined_spectral 0.2,1,1,2,2,1,2,refined_spectral,0.2,0,3,3,361.0,0.7718,,1
+refined_spectral 0.3,1,1,2,2,1,2,refined_spectral,0.3,0,3,3,351.0,0.7735,0.9178,1
+refined_spectral 0.4,1,1,2,2,1,2,refined_spectral,0.4,0,3,3,349.0,0.7724,,1
+refined_spectral 0.5,1,1,2,2,1,2,refined_spectral,0.5,0,3,3,346.0,0.7704,0.871,1
+refined_spectral 0.1,1,1,2,2,1,2,refined_spectral,0.1,0,3,3,338.0,0.7471,,1
+refined_spectral 0.9,2,1,2,1,2,1,refined_spectral,0.9,0,3,3,327.0,0.7787,,1
+refined_spectral 0.6,1,1,2,2,1,2,refined_spectral,0.6,0,3,3,320.0,0.7627,,1
+kefrin_euclidean 0.6,1,1,2,2,1,2,kefrin_euclidean,0.6,0,3,3,312.0,0.6694,,1
+kefrin_euclidean 0.7,1,1,2,2,2,2,kefrin_euclidean,0.7,0,4,2,306.0,0.681,,9
+refined_spectral 0.7,1,1,2,2,2,2,refined_spectral,0.7,0,4,2,298.0,0.7435,,9
+refined_spectral 0.8,1,2,2,2,2,2,refined_spectral,0.8,0,5,1,295.0,0.7496,,11
+dmon 0.4,2,2,1,2,2,2,dmon,0.4,0,5,1,280.0,0.741,,11
+dmon 0.3,2,2,1,2,2,2,dmon,0.3,0,5,1,266.0,0.704,0.6085,11
+kefrin_euclidean 0.5,1,1,2,2,1,3,kefrin_euclidean,0.5,1,2,3,301.0,0.6549,0.8145,14
+kefrin_cosine 0.7,2,2,1,1,3,1,kefrin_cosine,0.7,1,2,3,289.0,0.809,,14
+kefrin_euclidean 0.8,2,1,3,2,1,2,kefrin_euclidean,0.8,1,3,2,320.0,0.7459,,16
+fused_spectral 0.2,1,2,3,2,1,2,fused_spectral,0.2,1,3,2,304.0,0.7799,,16
+fused_spectral 0.3,1,2,3,2,1,2,fused_spectral,0.3,1,3,2,289.0,0.8061,0.9095,16
+kefrin_cosine 0.6,2,2,1,2,3,1,kefrin_cosine,0.6,1,3,2,281.0,0.7724,,16
+kefrin_euclidean 0.9,3,2,2,1,2,1,kefrin_euclidean,0.9,1,3,2,274.0,0.8091,,16
+refined_spectral 1.0,2,2,3,1,2,1,refined_spectral,1.0,1,3,2,273.0,0.7923,0.825,16
+kefrin_cosine 0.4,2,1,1,2,3,2,kefrin_cosine,0.4,1,3,2,266.0,0.6998,,16
+kefrin_cosine 0.5,2,2,1,2,3,2,kefrin_cosine,0.5,1,4,1,270.0,0.746,0.7217,23
+canus_cosine 0.4,2,2,1,2,3,2,canus_cosine,0.4,1,4,1,253.0,0.6939,,23
+canus_cosine 0.6,2,2,1,2,3,2,canus_cosine,0.6,1,4,1,247.0,0.7427,,23
+canus_cosine 0.5,2,2,1,2,3,2,canus_cosine,0.5,1,4,1,242.0,0.7237,0.7293,23
+canus_cosine 0.3,2,2,1,2,3,2,canus_cosine,0.3,1,4,1,241.0,0.6787,0.6711,23
+canus_euclidean 0.6,2,2,1,3,2,2,canus_euclidean,0.6,1,4,1,231.0,0.6661,,23
+fused_spectral 0.4,1,3,3,1,1,1,fused_spectral,0.4,2,0,4,282.0,0.8242,,29
+fused_spectral 0.5,1,3,3,1,1,1,fused_spectral,0.5,2,0,4,279.0,0.8359,0.8895,29
+kefrin_euclidean 0.4,1,1,2,3,1,3,kefrin_euclidean,0.4,2,1,3,309.0,0.6437,,31
+kefrin_euclidean 0.3,1,1,2,3,1,3,kefrin_euclidean,0.3,2,1,3,304.0,0.6353,0.8664,31
+kefrin_euclidean 0.2,1,1,2,3,1,3,kefrin_euclidean,0.2,2,1,3,302.0,0.6318,,31
+kmeans,1,1,2,3,1,3,kmeans,,2,1,3,301.0,0.6245,0.901,31
+kefrin_euclidean 0.1,1,1,2,3,1,3,kefrin_euclidean,0.1,2,1,3,298.0,0.6297,,31
+kefrin_euclidean 0.0,1,1,2,3,1,3,kefrin_euclidean,0.0,2,1,3,290.0,0.6232,0.9108,31
+kefrin_cosine 0.3,1,1,1,3,3,2,kefrin_cosine,0.3,2,1,3,267.0,0.6912,0.5101,31
+fused_spectral 0.6,1,3,3,1,2,1,fused_spectral,0.6,2,1,3,265.0,0.8408,,31
+canus_cosine 0.7,3,2,1,1,3,1,canus_cosine,0.7,2,1,3,238.0,0.778,,31
+canus_euclidean 0.7,2,2,1,3,1,3,canus_euclidean,0.7,2,2,2,278.0,0.6849,,40
+fused_spectral 0.7,2,3,3,1,2,1,fused_spectral,0.7,2,2,2,254.0,0.8419,,40
+fused_spectral 0.8,2,3,3,1,2,1,fused_spectral,0.8,2,2,2,254.0,0.8456,,40
+canus_euclidean 0.1,1,1,2,3,2,3,canus_euclidean,0.1,2,2,2,247.0,0.6111,,40
+canus_euclidean 0.5,1,1,2,3,2,3,canus_euclidean,0.5,2,2,2,246.0,0.6275,0.5514,40
+canus_euclidean 0.4,2,1,1,3,2,3,canus_euclidean,0.4,2,2,2,236.0,0.5961,,40
+canus_euclidean 0.3,2,1,1,3,2,3,canus_euclidean,0.3,2,2,2,219.0,0.5546,0.4437,40
+dmon 0.2,3,2,1,2,3,2,dmon,0.2,2,3,1,213.0,0.6856,,47
+canus_euclidean 0.8,3,3,2,2,1,2,canus_euclidean,0.8,2,3,1,208.0,0.7055,,47
+canus_cosine 0.0,2,2,1,3,2,3,canus_cosine,0.0,2,3,1,180.0,0.5878,0.5517,47
+dmon 0.5,3,3,1,1,3,1,dmon,0.5,3,0,3,264.0,0.7988,0.6109,50
+kefrin_cosine 0.8,3,3,1,1,3,1,kefrin_cosine,0.8,3,0,3,259.0,0.8436,,50
+dmon 0.9,3,3,1,1,3,1,dmon,0.9,3,0,3,257.0,0.8425,,50
+kefrin_cosine 1.0,3,3,3,1,1,1,kefrin_cosine,1.0,3,0,3,229.0,0.8441,0.324,50
+kefrin_euclidean 1.0,3,3,1,1,1,3,kefrin_euclidean,1.0,3,0,3,228.0,0.9079,0.1515,50
+fused_spectral 0.9,3,3,3,1,2,1,fused_spectral,0.9,3,1,2,264.0,0.8613,,55
+dmon 1.0,3,3,2,1,3,1,dmon,1.0,3,1,2,250.0,0.8435,0.5427,55
+kefrin_cosine 0.1,2,1,1,3,3,3,kefrin_cosine,0.1,3,1,2,242.0,0.6464,,55
+kefrin_cosine 0.9,3,3,3,1,2,1,kefrin_cosine,0.9,3,1,2,241.0,0.8483,,55
+dmon 0.8,3,3,2,1,3,1,dmon,0.8,3,1,2,236.0,0.8494,,55
+kefrin_cosine 0.2,2,1,1,3,3,3,kefrin_cosine,0.2,3,1,2,235.0,0.6502,,55
+louvain,3,3,3,1,2,1,louvain,,3,1,2,233.0,0.8992,0.6864,55
+dmon 0.7,3,3,2,1,3,1,dmon,0.7,3,1,2,233.0,0.8325,,55
+kefrin_cosine 0.0,2,1,1,3,3,3,kefrin_cosine,0.0,3,1,2,229.0,0.6334,0.8903,55
+leiden,3,3,3,1,2,1,leiden,,3,1,2,228.0,0.8891,0.6651,55
+dmon 0.6,3,3,2,1,3,1,dmon,0.6,3,1,2,228.0,0.8333,,55
+spectral,3,3,3,1,2,1,spectral,,3,1,2,221.0,0.8707,0.8382,55
+fused_spectral 1.0,3,3,3,1,2,1,fused_spectral,1.0,3,1,2,221.0,0.8707,0.8382,55
+canus_euclidean 0.2,2,1,3,3,2,3,canus_euclidean,0.2,3,2,1,222.0,0.6017,,68
+refined_spectral 0.0,1,2,3,3,2,3,refined_spectral,0.0,3,2,1,214.0,0.7317,0.8435,68
+dmon 0.1,3,2,1,3,3,2,dmon,0.1,3,2,1,204.0,0.6486,,68
+canus_euclidean 0.9,3,3,3,2,1,2,canus_euclidean,0.9,3,2,1,201.0,0.7509,,68
+ward,2,2,3,3,1,3,ward,,3,2,1,177.0,0.5853,0.4328,68
+fused_spectral 0.0,1,2,3,3,2,3,fused_spectral,0.0,3,2,1,158.0,0.6801,0.8553,68
+canus_cosine 0.1,2,2,2,3,3,3,canus_cosine,0.1,3,3,0,174.0,0.6245,,74
+canus_euclidean 0.0,2,2,3,3,2,3,canus_euclidean,0.0,3,3,0,168.0,0.5553,0.3634,74
+fused_spectral 0.1,1,3,3,3,1,3,fused_spectral,0.1,4,0,2,234.0,0.6949,,76
+canus_cosine 0.8,3,3,3,1,3,1,canus_cosine,0.8,4,0,2,202.0,0.8173,,76
+canus_cosine 0.9,3,3,3,1,3,1,canus_cosine,0.9,4,0,2,187.0,0.8343,,76
+canus_cosine 1.0,3,3,3,1,3,1,canus_cosine,1.0,4,0,2,174.0,0.8233,0.429,76
+dmon 0.0,3,2,1,3,3,3,dmon,0.0,4,1,1,196.0,0.6175,0.4519,80
+canus_cosine 0.2,3,2,1,3,3,3,canus_cosine,0.2,4,1,1,189.0,0.6029,,80
+canus_euclidean 1.0,3,3,3,2,1,3,canus_euclidean,1.0,4,1,1,139.0,0.8941,0.2244,80
+gmm,3,3,3,3,1,3,gmm,,5,0,1,79.0,0.5159,0.5231,83

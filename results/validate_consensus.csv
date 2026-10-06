@@ -1,0 +1,22 @@
+,mean_ari_with_others,ari_with_consensus
+refined_spectral 0.3,0.5285,0.6384
+multilayer,0.5241,0.6038
+refined_spectral 0.5,0.5199,0.619
+fused_spectral 0.3,0.5015,0.5669
+kefrin_euclidean 0.3,0.4821,0.7602
+kmeans,0.4783,0.7431
+fused_spectral 0.5,0.4753,0.5219
+kefrin_euclidean 0.5,0.4737,0.7579
+kefrin_cosine 0.5,0.4718,0.5801
+canus_cosine 0.5,0.4557,0.5329
+kefrin_cosine 0.3,0.4554,0.4927
+canus_cosine 0.3,0.4512,0.5606
+canus_euclidean 0.5,0.4462,0.6527
+dmon 0.3,0.4397,0.558
+dmon 0.5,0.4201,0.4727
+louvain,0.3863,0.3487
+leiden,0.3763,0.356
+canus_euclidean 0.3,0.3746,0.452
+spectral,0.3722,0.3431
+ward,0.3555,0.5013
+gmm,0.2236,0.2424

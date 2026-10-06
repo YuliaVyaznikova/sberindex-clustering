@@ -1,0 +1,17 @@
+,value
+nodes,1808.0
+edges,11931.0
+degree_min,10.0
+degree_median,13.0
+degree_max,25.0
+components,1.0
+clustering,0.3638669039486427
+clustering_rewired,0.006756148854738439
+mean_path,5.456768123962369
+mean_path_rewired,3.188818483674599
+small_world_sigma,31.472964003370905
+degree_assortativity,0.2114642060748765
+type_within_weight,0.770336572435961
+type_within_expected,0.23911480229256632
+region_within_weight,0.14389539113431793
+region_within_expected,0.018526355467664915
