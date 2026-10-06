@@ -8,13 +8,14 @@ from src.dynamics import track
 from src.features import build_features
 from src.prepare import prepare
 from src.robustness import robustness
+from src.site import site
 from src.synthetic import synthetic
 from src.validate import validate
 
 
 def main():
     parser = argparse.ArgumentParser(description="Dynamic attributed network of Russian municipalities")
-    parser.add_argument("step", choices=["download", "prepare", "features", "compare", "track", "robustness", "describe", "validate", "synthetic"])
+    parser.add_argument("step", choices=["download", "prepare", "features", "compare", "track", "robustness", "describe", "validate", "synthetic", "site"])
     parser.add_argument("--all", action="store_true", help="download every source, not only the contest package")
     parser.add_argument("--config", default="config.yaml")
     args = parser.parse_args()
@@ -35,8 +36,10 @@ def main():
         describe(config)
     elif args.step == "validate":
         validate(config)
-    else:
+    elif args.step == "synthetic":
         synthetic(config)
+    else:
+        site(config)
 
 
 if __name__ == "__main__":

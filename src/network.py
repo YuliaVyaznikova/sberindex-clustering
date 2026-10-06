@@ -24,7 +24,7 @@ def load_data(config):
     monthly = pd.read_parquet(processed / "spending_monthly.parquet")
     settings = config["network"]
     if settings["cities"] == "merge":
-        features, territories, monthly = merge_cities(features, territories, monthly)
+        features, territories, monthly = merge_cities(features, territories, monthly, settings["city_coverage"])
     elif settings["cities"] == "drop":
         keep = ~territories["city_district"]
         features = features[features["territory_id"].map(keep)]
@@ -34,17 +34,20 @@ def load_data(config):
     return {"features": features, "territories": territories, "monthly": monthly}
 
 
-def merge_cities(features, territories, monthly):
+def merge_cities(features, territories, monthly, coverage):
     districts = territories[territories["city_district"]]
     city_of = districts["region"].map(CITIES)
     part = features[features["territory_id"].isin(districts.index)].assign(city=lambda t: t["territory_id"].map(city_of))
     columns = [c for c in features.columns if c not in ("territory_id", "period", "months", "complete")]
     rows = []
     for (city, period), group in part.groupby(["city", "period"]):
-        weight = group["population"]
-        row = {c: np.average(group[c], weights=weight) for c in columns}
-        row.update(territory_id=city, period=period, months=group["months"].min(), complete=bool(group["complete"].all()))
-        row["population"] = weight.sum()
+        full = group[group["complete"]]
+        if full.empty:
+            continue
+        row = {c: np.average(full[c], weights=full["population"]) for c in columns}
+        covered = full["population"].sum() / group["population"].sum()
+        row.update(territory_id=city, period=period, months=full["months"].min(), complete=bool(covered >= coverage))
+        row["population"] = group["population"].sum()
         row["emp_total"] = group["emp_total"].sum()
         row["emp_rate"] = row["emp_total"] / row["population"]
         row["log_population"] = np.log(row["population"])

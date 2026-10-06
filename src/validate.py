@@ -20,14 +20,15 @@ from sklearn.model_selection import cross_val_score
 
 from . import methods
 from .compare import agreement, subsamples
-from .describe import INK, MUTED, PROFILE, style
+from .describe import GRID, INK, MUTED, PROFILE, style
 from .features import load_territories, match, read_prepared
 from .metrics import panel
 from .network import BLOCKS, load_data, snapshot, transform
+from .robustness import model
 
 LABELS = {
-    **PROFILE, "share_other": "доля прочего", "emp_utilities": "занятость: энергетика и ЖКХ",
-    "emp_construction": "занятость: стройка", "emp_trade": "занятость: торговля", "emp_transport": "занятость: транспорт",
+    **PROFILE, "share_other": "доля прочего", "emp_utilities": "занятость, энергетика и ЖКХ",
+    "emp_construction": "занятость, стройка", "emp_trade": "занятость, торговля", "emp_transport": "занятость, транспорт",
 }
 BLOCK_COLORS = {"spending": "#2a78d6", "labor": "#eb6834", "place": "#1baf7a"}
 ABLATION = {
@@ -181,6 +182,41 @@ def check_changes(config, data, types, confidence, first, last):
     bands = pd.cut(frame["confidence"], [0, 0.7, 0.9, 1.0], include_lowest=True)
     shares = pd.Series(moved, index=frame.index).groupby(bands, observed=True).agg(["size", "mean"])
     return pd.DataFrame(rows), shares.rename(columns={"size": "municipalities", "mean": "changed_share"}), int(moved.sum()), len(moved)
+
+
+def nesting(macro, fine):
+    table = pd.crosstab(fine, macro)
+    return table, table.max(axis=1).sum() / table.to_numpy().sum()
+
+
+def type_affinity(shot, labels, k, alpha):
+    w = methods.fuse(shot["graph"], shot["attribute_graph"], alpha).tocsr()
+    member = np.zeros((len(labels), k))
+    member[np.arange(len(labels)), labels] = 1
+    between = member.T @ (w @ member)
+    sizes = member.sum(axis=0)
+    between = between / np.outer(sizes, sizes)
+    return between / np.sqrt(np.outer(np.diag(between), np.diag(between)))
+
+
+def check_hierarchy(config, shots, periods, types, names):
+    settings, alpha = config["validate"], config["model"]["alpha"]
+    fine = types.set_index(["territory_id", "period"])["type"]
+    last = periods[-1]
+    rows = []
+    for k in settings["hierarchy_ks"]:
+        macro = model(shots, periods, config, alpha, k, config["dynamics"]["coupling"]).stack().dropna().astype(int).reindex(fine.index)
+        _, total = nesting(macro, fine)
+        _, last_total = nesting(macro.xs(last, level="period"), fine.xs(last, level="period"))
+        mapping = pd.crosstab(fine, macro).idxmax(axis=1)
+        rows.append({"k": k, "nesting_all_windows": total, "nesting_last": last_total, "ari_merged_vs_direct": adjusted_rand_score(macro, fine.map(mapping))})
+    shot = shots[last]
+    labels = fine.xs(last, level="period").reindex(shot["ids"])
+    keep = labels.notna().to_numpy()
+    sub = {"graph": shot["graph"][keep][:, keep], "attribute_graph": shot["attribute_graph"][keep][:, keep]}
+    affinity = type_affinity(sub, labels[keep].astype(int).to_numpy(), config["model"]["k"], alpha)
+    labels = [names[t] for t in range(len(affinity))]
+    return pd.DataFrame(rows), pd.DataFrame(affinity, index=labels, columns=labels)
 
 
 def with_k(method, w, k, steps):
@@ -382,18 +418,18 @@ def plot_network(mix, morans, names, order, period, n, path):
     for i in range(len(order)):
         for j in range(len(order)):
             ax.text(j, i, f"{shown[i, j]:.0%}", ha="center", va="center", fontsize=9, color="white" if shown[i, j] > 0.5 else INK)
-    ax.set_title("Куда ведут рёбра сети потребления: доля веса рёбер типа", loc="left", fontsize=11)
+    ax.set_title("Куда ведут рёбра сети потребления, доля веса рёбер типа", loc="left", fontsize=11)
     ax = axes[1]
     rows = morans.sort_values("moran_i")
     ax.barh(range(len(rows)), rows["moran_i"], color=[BLOCK_COLORS[b] for b in rows["block"]])
     ax.set_yticks(range(len(rows)), [LABELS[f] for f in rows["feature"]], fontsize=8.5)
     ax.axvline(0, color=MUTED, linewidth=0.8)
-    ax.set_xlabel("Moran's I на графе потребления (0: нет сетевой автокорреляции)")
+    ax.set_xlabel("Moran's I на графе потребления, 0 значит нет автокорреляции")
     handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in BLOCK_COLORS.values()]
     ax.legend(handles, ["потребление", "труд", "место"], frameon=False, loc="lower right")
     ax.set_title("Какие признаки согласованы с сетью потребления", loc="left", fontsize=11)
-    fig.text(0.01, 0.01, f"Окно {period}, {n} МО, граф 10 ближайших по структуре трат. Признаки потребления согласованы с сетью по построению; "
-             "важно, что признаки места и зарплата тоже согласованы, а отраслевая занятость слабее.", color=MUTED, fontsize=9)
+    fig.text(0.01, 0.01, f"Окно {period}, {n} МО, граф 10 ближайших по структуре трат. Признаки потребления согласованы с сетью по построению. "
+             "Важно, что признаки места и зарплата тоже согласованы, а отраслевая занятость слабее.", color=MUTED, fontsize=9)
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     fig.savefig(path, dpi=150)
     plt.close(fig)
@@ -410,9 +446,9 @@ def plot_consensus(ari, k, period, path):
         for j in range(len(shown)):
             v = shown.iat[i, j]
             ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=7, color="white" if v > 0.6 else INK)
-    ax.set_title(f"Насколько похожи разбиения разных методов: ARI, k = {k}, окно {period}", loc="left")
-    fig.text(0.01, 0.01, "Порядок по иерархической кластеризации методов (средняя связь по 1 - ARI). Число после названия: вес графа alpha. "
-             "multilayer: итоговые типы.", color=MUTED, fontsize=9)
+    ax.set_title(f"Насколько похожи разбиения разных методов, ARI, k = {k}, окно {period}", loc="left")
+    fig.text(0.01, 0.01, "Порядок по иерархической кластеризации методов (средняя связь по 1 - ARI). Число после названия означает вес графа alpha. "
+             "multilayer это итоговые типы.", color=MUTED, fontsize=9)
     fig.tight_layout(rect=(0, 0.02, 1, 1))
     fig.savefig(path, dpi=150)
     plt.close(fig)
@@ -420,17 +456,52 @@ def plot_consensus(ari, k, period, path):
 
 def plot_stability(table, alpha, runs, path):
     fig, ax = plt.subplots(figsize=(10, 4.8))
-    for offset, (name, label, color) in zip([-0.08, 0.08], [("kmeans", "k-means", "#52514e"), ("refined_spectral", f"совместная спектральная с уточнением, alpha {alpha}", "#1baf7a")]):
+    for offset, (name, label, color) in zip([-0.08, 0.08], [("kmeans", "k-means", "#52514e"), ("refined_spectral", f"SPECTRA, alpha {alpha}", "#1baf7a")]):
         part = table[(table["part"] == "curve") & table["config"].str.startswith(name)]
         ax.errorbar(part["k"] + offset, part["mean"], yerr=[part["mean"] - part["p5"], part["p95"] - part["mean"]], fmt="o-", color=color, capsize=3, label=label, markersize=5)
     ax.axhline(0.85, color=MUTED, linestyle="--", linewidth=0.9)
     ax.text(table["k"].max() + 0.3, 0.85, "0.85", color=MUTED, va="center", fontsize=9)
     ax.set_xlabel("число типов k")
     ax.set_ylabel("ARI с разбиением всех МО")
-    ax.set_title(f"Устойчивость к составу МО: {runs} подвыборок по 90%, точки: среднее, усы: 5-95%", loc="left", fontsize=11)
+    ax.set_title(f"Устойчивость к составу МО, {runs} подвыборок по 90%. Точки показывают среднее, усы 5-95%", loc="left", fontsize=11)
     ax.grid(axis="y", alpha=0.3)
     ax.legend(frameon=False, fontsize=9, loc="lower left")
     fig.tight_layout()
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+
+
+def plot_refinement(table, methods_table, k, weight, path):
+    existing = methods_table[methods_table["k"] == k]
+    worst = -np.percentile(-existing["S_Dbw"], 100 / 3)
+    rows = table[table["weight"].notna()]
+    base = table[table["weight"].isna()].iloc[0]
+    fig, axes = plt.subplots(1, 3, figsize=(13, 4.6), sharex=True)
+    for ax, column, title in [(axes[0], "S_Dbw", "S_Dbw, меньше лучше"), (axes[1], "MQ", "MQ на графе потребления"), (axes[2], "stability", "Устойчивость к составу МО")]:
+        ax.plot(rows["weight"], rows[column], marker="o", markersize=4.5, linewidth=1.2, color="#1baf7a", zorder=3)
+        ax.axhline(base[column], color=MUTED, linestyle=":", linewidth=1)
+        ax.axvline(weight, color=INK, linewidth=0.8)
+        ax.set_title(title, loc="left", fontsize=11)
+        ax.yaxis.grid(True, color=GRID, linewidth=0.6)
+        ax.set_axisbelow(True)
+        ax.set_xlim(-0.04, 1.04)
+    ax = axes[0]
+    top = max(rows["S_Dbw"].max(), worst, base["S_Dbw"])
+    ax.axhline(worst, color="#eb6834", linestyle="--", linewidth=1)
+    ax.axhspan(worst, top + 0.01, color="#eb6834", alpha=0.08, linewidth=0)
+    ax.set_ylim(rows["S_Dbw"].min() - 0.005, top + 0.01)
+    ax.text(0.02, worst + 0.001, "худшая треть выше этой линии", color=INK, fontsize=8.5, va="bottom")
+    ax = axes[2]
+    ax.plot(rows["weight"], rows["stability_p5"], marker="v", markersize=3.5, linewidth=0.8, color="#1baf7a", alpha=0.6)
+    ax.text(0.02, rows["stability_p5"].max() + 0.004, "5-й процентиль", color=INK, fontsize=8.5, va="bottom")
+    for ax, column in zip(axes, ["S_Dbw", "MQ", "stability"]):
+        ax.text(0.3 if column == "stability" else 0.02, base[column], "без уточнения", color=MUTED, fontsize=8.5, va="bottom" if column == "MQ" else "top")
+        ax.set_xlabel("вес графа в уточнении w")
+    axes[0].text(weight + 0.015, axes[0].get_ylim()[0], f"выбрано {weight}", color=INK, fontsize=8.5, va="bottom")
+    fig.suptitle("Вес графа в уточнении", x=0.01, ha="left", fontsize=12)
+    fig.text(0.01, 0.905, f"До w = {weight} нет худших третей по шести индексам, при w = 0.8 S_Dbw попадает в худшую треть", color=MUTED, fontsize=10)
+    fig.text(0.01, 0.012, "Точки это значения при разных весах, горизонтальная пунктирная линия это вариант без уточнения. Худшая треть считается по методам из сравнения при том же k.", color=MUTED, fontsize=8.5)
+    fig.tight_layout(rect=(0, 0.04, 1, 0.92))
     fig.savefig(path, dpi=150)
     plt.close(fig)
 
@@ -480,6 +551,13 @@ def validate(config):
     print(scores.round(4).to_string(index=False))
     print(shares.round(3).to_string(), flush=True)
 
+    shots = {p: shot if p == period else snapshot(config, data, p) for p in periods}
+    hierarchy, affinity = check_hierarchy(config, shots, periods, types, names)
+    hierarchy.round(4).to_csv(out / "type_hierarchy.csv", index=False)
+    affinity.round(4).to_csv(out / "type_affinity.csv")
+    print(hierarchy.round(3).to_string(index=False))
+    print(affinity.round(3).to_string(), flush=True)
+
     keep = final.notna().to_numpy()
     parts = {name: labels[keep] for name, labels in partitions(config, x, w, wa).items()}
     parts["multilayer"] = final[keep].astype(int).to_numpy()
@@ -516,8 +594,10 @@ def validate(config):
     best.round(4).to_csv(out / "validate_ranking_methods.csv")
     print("best configuration of each method by the threshold rule, with stability on the validate subsamples:")
     print(best.round(3).to_string(), flush=True)
-    refinement = check_refinement(config, x, w, wa, pd.read_csv(out / "methods.csv"), rng)
+    existing = pd.read_csv(out / "methods.csv")
+    refinement = check_refinement(config, x, w, wa, existing, rng)
     refinement.round(4).to_csv(out / "validate_refinement.csv", index=False)
+    plot_refinement(refinement, existing, k, config["model"]["refine_weight"], figures / "refinement_weight.png")
     print("sensitivity of the refinement weight (the last row has no refinement):")
     with pd.option_context("display.width", 250):
         print(refinement.round(3).to_string(index=False), flush=True)

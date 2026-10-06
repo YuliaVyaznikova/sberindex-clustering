@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.ticker import MultipleLocator, PercentFormatter
 from scipy.optimize import linear_sum_assignment
+from scipy.stats import spearmanr
 from sklearn.cluster import KMeans
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import adjusted_rand_score, r2_score
@@ -45,6 +46,14 @@ def spending_gap(features, territories, types, period, seed=0):
     return table, r2_score(level, predicted)
 
 
+def gap_stability(table, r2, early):
+    common = table.index.intersection(early.index)
+    return pd.DataFrame([{
+        "r2_out_of_fold": r2, "above_15": int((table["gap"] >= 0.15).sum()), "below_15": int((table["gap"] <= -0.15).sum()),
+        "spearman_first_last": spearmanr(early.loc[common, "gap"], table.loc[common, "gap"]).statistic, "municipalities": len(common),
+    }])
+
+
 def short_name(name):
     for word in ["муниципальный район", "муниципальный округ", "городской округ город", "городской округ"]:
         name = name.replace(word, "")
@@ -60,7 +69,7 @@ def plot_gap(shapes, table, r2, period, colors, path):
     for low, high, color, label in GAP_STEPS:
         shapes[(shapes["gap"] >= low) & (shapes["gap"] < high)].plot(ax=ax, color=color, edgecolor=colors["surface"], linewidth=0.1)
         count = int(table["gap"].between(low, high, inclusive="left").sum())
-        handles.append(plt.Rectangle((0, 0), 1, 1, color=color, label=f"{label}: {count} МО"))
+        handles.append(plt.Rectangle((0, 0), 1, 1, color=color, label=f"{label}, {count} МО"))
     ax.legend(handles=handles, loc="lower left", frameon=False, title="траты жителей против прогноза\nпо местной экономике", fontsize=9, title_fontsize=9.5)
     ax.set_axis_off()
     side = fig.add_axes((0.73, 0.06, 0.26, 0.84))
@@ -76,7 +85,7 @@ def plot_gap(shapes, table, r2, period, colors, path):
         y -= 0.04
     fig.suptitle(f"Где траты не следуют за местной экономикой, окно {period}", x=0.01, ha="left", fontsize=13)
     fig.text(0.01, 0.015, f"Прогноз уровня трат по {len(ECONOMY)} признакам труда и места, градиентный бустинг, out-of-fold на 5-fold кросс-валидации, R² = {r2:.2f}. "
-             "Светло-серым: МО без полных данных.", color=colors["muted"], fontsize=9)
+             "Светло-серым цветом показаны МО без полных данных.", color=colors["muted"], fontsize=9)
     fig.savefig(path, dpi=150)
     plt.close(fig)
 
@@ -184,7 +193,7 @@ def plot_monthly(shares, k, municipalities, colors, path):
     ax.grid(axis="y", alpha=0.3)
     ax.legend(frameon=False, fontsize=9, loc="upper right")
     ax.set_title("Помесячные «переходы» между типами в основном сезонность и шум", loc="left")
-    fig.text(0.01, 0.01, f"{municipalities} МО с тратами за все месяцы, k-means, k = {k}, только признаки трат. Подпись месяца: конец перехода.", color=colors["muted"], fontsize=9)
+    fig.text(0.01, 0.01, f"{municipalities} МО с тратами за все месяцы, k-means, k = {k}, только признаки трат. Подпись месяца означает конец перехода.", color=colors["muted"], fontsize=9)
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     fig.savefig(path, dpi=150)
     plt.close(fig)
@@ -232,8 +241,8 @@ def plot_marketplaces(shares, palette, municipalities, period, colors, path):
     ax.set_xticks(range(0, len(ratio), 6), list(ratio.index)[::6], fontsize=8.5)
     ax.set_ylabel(f"доля маркетплейсов к доле в типе «{palette['short'][cities]}»")
     ax.grid(axis="y", alpha=0.3)
-    ax.set_title("К Городам: периферия впереди, удалённые догоняют", loc="left")
-    fig.text(0.01, 0.01, f"{municipalities} МО с тратами за все месяцы; типы по окну {period}; медиана по МО типа.", color=colors["muted"], fontsize=9)
+    ax.set_title("Периферия впереди Городов, удалённые догоняют", loc="left")
+    fig.text(0.01, 0.01, f"{municipalities} МО с тратами за все месяцы, типы по окну {period}, медиана по МО типа.", color=colors["muted"], fontsize=9)
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     fig.savefig(path, dpi=150)
     plt.close(fig)

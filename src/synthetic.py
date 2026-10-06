@@ -24,7 +24,7 @@ SCENARIOS = {
     "spending_only": "типы различаются только тратами",
     "noisier": "шум в 1.5 раза сильнее",
     "independent_graph": "граф со своим сигналом,\nпризнаки шумные",
-    "no_spending": "траты не связаны с типом:\nграф потребления бесполезен",
+    "no_spending": "траты не связаны с типом,\nграф потребления бесполезен",
 }
 SHOWN = [
     ("kmeans", "k-means", "#52514e", "s"),
@@ -32,7 +32,7 @@ SHOWN = [
     ("spectral", "спектральная по графу", "#2a78d6", "^"),
     ("dmon", "DMoN", "#e87ba4", "v"),
     ("fused_spectral", "совместная спектральная без уточнения", "#eda100", "P"),
-    ("refined_spectral", "совместная спектральная с уточнением", "#1baf7a", "o"),
+    ("refined_spectral", "SPECTRA", "#1baf7a", "o"),
 ]
 INDICES = ["SW", "CH", "S_Dbw", "DB", "AVI", "AVU", "MQ", "within"]
 
@@ -140,13 +140,13 @@ def plot(table, alpha, n, path):
     ax.set_yticks(range(len(SCENARIOS)), list(SCENARIOS.values()))
     ax.set_ylim(len(SCENARIOS) - 0.5, -0.5)
     ax.set_xlim(-0.03, 1.03)
-    ax.set_xlabel("ARI с истинными типами (точка: среднее по наборам, отрезок: от худшего до лучшего)")
+    ax.set_xlabel("ARI с истинными типами (точка это среднее по наборам, отрезок идёт от худшего до лучшего)")
     ax.xaxis.grid(True, color=GRID, linewidth=0.6)
     ax.set_axisbelow(True)
     fig.legend(frameon=False, fontsize=9, loc="upper left", bbox_to_anchor=(0.01, 0.925), ncol=3)
-    fig.suptitle("Синтетические данные с известными типами: ARI разных методов в шести сценариях", x=0.01, ha="left", fontsize=12)
-    fig.text(0.01, 0.012, f"{n} МО; центры типов, их размеры и разброс внутри типов взяты из окна модели. Граф строится как в модели (ближайшие соседи по тратам),\n"
-             "кроме сценария со своим графом (planted partition). Подписи: среднее у k-means и у модели (совместная спектральная с уточнением).", color=MUTED, fontsize=8.5)
+    fig.suptitle("Синтетические данные с известными типами. ARI разных методов в шести сценариях", x=0.01, ha="left", fontsize=12)
+    fig.text(0.01, 0.012, f"{n} МО. Центры типов, их размеры и разброс внутри типов взяты из итоговых типов. Граф строится как в SPECTRA (ближайшие соседи по тратам),\n"
+             "кроме сценария со своим графом (planted partition). Подписаны средние значения у k-means и у SPECTRA.", color=MUTED, fontsize=8.5)
     fig.subplots_adjust(left=0.215, right=0.99, top=0.83, bottom=0.15)
     fig.savefig(path, dpi=150)
     plt.close(fig)
@@ -206,6 +206,55 @@ def truth_partitions(config, x, w, wa, k):
     return result
 
 
+TRUTH_METHODS = [
+    ("kmeans", "k-means", "#52514e"),
+    ("kefrin_euclidean", "KEFRiN, евклид", "#eb6834"),
+    ("kefrin_cosine", "KEFRiN, косинус", "#eb6834"),
+    ("spectral", "спектральная по графу", "#2a78d6"),
+    ("fused_spectral", "совместная спектральная без уточнения", "#eda100"),
+    ("refined_spectral", "SPECTRA", "#1baf7a"),
+]
+TRUTH_SOURCES = [
+    ("model", "данные из типов SPECTRA", "o"),
+    ("kmeans", "данные из типов k-means", "s"),
+    ("spectral", "данные из типов спектральной по графу", "^"),
+]
+
+
+def plot_truths(table, weight, path):
+    part = table[table["scenario"] == "calibrated"]
+    mean = part.groupby(["method", "truth"])["ari"].mean()
+    repeats = part["repeat"].nunique()
+    fig, ax = plt.subplots(figsize=(11, 5.2))
+    for row, (method, label, color) in enumerate(TRUTH_METHODS):
+        key = f"refined_spectral w{weight}" if method == "refined_spectral" else method
+        values = [mean[(key, source)] for source, _, _ in TRUTH_SOURCES]
+        final = method == "refined_spectral"
+        if final:
+            ax.axhspan(row - 0.45, row + 0.45, color=GRID, alpha=0.35, linewidth=0)
+        ax.plot([min(values), max(values)], [row, row], color=color, linewidth=1.2, zorder=2)
+        for value, (_, _, marker) in zip(values, TRUTH_SOURCES):
+            ax.scatter([value], [row], s=90 if final else 56, marker=marker, color=color, edgecolor="white", linewidth=1, zorder=3)
+        ax.text(min(values) - 0.02, row, f"худший {min(values):.2f}", ha="right", va="center", fontsize=9, color=INK, fontweight="bold" if final else "normal")
+    ax.set_yticks(range(len(TRUTH_METHODS)), [label for _, label, _ in TRUTH_METHODS])
+    ax.get_yticklabels()[-1].set_fontweight("bold")
+    ax.get_yticklabels()[-1].set_color(INK)
+    ax.set_ylim(len(TRUTH_METHODS) - 0.5, -0.5)
+    ax.set_xlim(0.1, 0.8)
+    ax.set_xlabel(f"ARI с истинными типами, среднее по {repeats} наборам")
+    ax.xaxis.grid(True, color=GRID, linewidth=0.6)
+    ax.set_axisbelow(True)
+    handles = [plt.Line2D([], [], marker=marker, linestyle="", color=MUTED, markersize=7, label=label) for _, label, marker in TRUTH_SOURCES]
+    fig.legend(handles=handles, frameon=False, fontsize=9, loc="upper left", bbox_to_anchor=(0.01, 0.87), ncol=3)
+    fig.suptitle("Синтетические данные из типов разных методов", x=0.01, ha="left", fontsize=12)
+    fig.text(0.01, 0.905, "Каждый метод силён на своих типах, у SPECTRA самый высокий худший случай", color=MUTED, fontsize=10)
+    fig.text(0.01, 0.012, "Данные сгенерированы как в сценарии «как реальные данные». Центры, размеры и разброс типов взяты из типов названного метода,\n"
+             "граф строится по тратам. Метка у левого края отрезка показывает худший из трёх случаев.", color=MUTED, fontsize=8.5)
+    fig.subplots_adjust(left=0.31, right=0.98, top=0.78, bottom=0.2)
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+
+
 def check_truths(config):
     out = config["paths"]["results"]
     settings = config["synthetic"]
@@ -239,3 +288,6 @@ def check_truths(config):
             wide = part.pivot(index="repeat", columns="method", values="ari")
             wins = {m: int((wide[reference] > wide[m]).sum()) for m in wide.columns if m != reference}
             print(f"{source} {name} (of {len(wide)}):", wins)
+    figures = out / "figures"
+    figures.mkdir(parents=True, exist_ok=True)
+    plot_truths(table, config["model"]["refine_weight"], figures / "synthetic_truths.png")

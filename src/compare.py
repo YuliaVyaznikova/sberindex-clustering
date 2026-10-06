@@ -170,7 +170,7 @@ def plot_methods(table, model, folder):
         part = table[table["k"] == k]
         for name, color in colors.items():
             line = part[part["method"] == name].sort_values("alpha")
-            ax.plot(line["SW"], line["MQ"], marker="o", markersize=3.5, linewidth=1.2, color=color, label=name)
+            ax.plot(line["SW"], line["MQ"], marker="o", markersize=3.5, linewidth=1.2, color=color, label="SPECTRA" if name == "refined_spectral" else name)
         for name, marker in markers.items():
             point = part[part["method"] == name]
             ax.scatter(point["SW"], point["MQ"], marker=marker, s=60, color="black", label=name, zorder=5)
@@ -181,7 +181,7 @@ def plot_methods(table, model, folder):
         ax.grid(alpha=0.3)
     axes[0].set_ylabel("MQ, граф потребления")
     axes[0].legend(fontsize=7.5, loc="lower left", ncol=2)
-    fig.suptitle(f"Качество в пространстве признаков и на графе: линии это путь совместных методов по весу графа alpha от 0 до 1, кружок это выбранная модель (alpha {model['alpha']})")
+    fig.suptitle(f"Качество в пространстве признаков и на графе. Линии показывают путь совместных методов по весу графа alpha от 0 до 1, кружком отмечена SPECTRA (alpha {model['alpha']})")
     fig.tight_layout()
     fig.savefig(folder / "methods_tradeoff.png", dpi=130)
     plt.close(fig)
