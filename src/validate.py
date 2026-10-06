@@ -465,7 +465,7 @@ def plot_stability(table, alpha, runs, path):
     ax.set_ylabel("ARI с разбиением всех МО")
     ax.set_title(f"Устойчивость к составу МО, {runs} подвыборок по 90%. Точки показывают среднее, усы 5-95%", loc="left", fontsize=11)
     ax.grid(axis="y", alpha=0.3)
-    ax.legend(frameon=False, fontsize=9, loc="lower left")
+    ax.legend(frameon=False, fontsize=9, loc="lower right")
     fig.tight_layout()
     fig.savefig(path, dpi=150)
     plt.close(fig)
