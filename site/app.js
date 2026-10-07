@@ -61,7 +61,7 @@ function start(atlas, shapes, network, extra) {
   changes();
   market();
   model();
-  const example = atlas.mo.find((r) => r[1] === "городской округ город Томск");
+  const example = atlas.mo.find((r) => r[1] === "городской округ город Новосибирск");
   select(example ? example[0] : null);
 
   function hero() {
@@ -397,7 +397,7 @@ function start(atlas, shapes, network, extra) {
     if (i !== undefined) {
       const list = network.neighbors[i];
       const kms = list.map((d) => d[1]).filter((v) => v >= 0).sort((a, b) => a - b);
-      const median = kms.length ? kms[Math.floor(kms.length / 2)] : null;
+      const median = kms.length ? Math.round(d3.median(kms)) : null;
       const own = list.filter(([j]) => records.get(nodes[j].id) && records.get(nodes[j].id).region === r.region).length;
       twins = `<div class="label">10 МО с самой похожей структурой трат</div>` +
         `<div class="reg">в своём регионе ${own} из 10${median !== null ? `, медиана расстояния ${median} км` : ""}</div>` +
