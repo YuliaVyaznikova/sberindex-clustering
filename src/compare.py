@@ -7,13 +7,14 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
+from scipy import sparse
 from scipy.sparse.csgraph import connected_components
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
 
 from . import methods
 from .kefrin import default_alpha
 from .metrics import panel
-from .network import edge_variants, load_data, snapshot
+from .network import BLOCKS, edge_variants, lagged_correlation, load_data, residual_growth, snapshot, transform
 
 
 def edge_set(w):
@@ -52,23 +53,43 @@ def describe_graph(w, labels, regions, types, distance):
     }
 
 
+def moran_index(w, values):
+    degree = np.asarray(w.sum(axis=1), dtype=float).ravel()
+    rows = sparse.diags(np.divide(1, degree, out=np.zeros_like(degree), where=degree > 0)) @ w
+    z = values - values.mean()
+    return len(z) / rows.sum() * (z @ (rows @ z)) / (z @ z)
+
+
+def smoothness(w, scaled):
+    result = {f"moran_{block}": float(np.median([moran_index(w, scaled[c].to_numpy()) for c in BLOCKS[block]])) for block in ["labor", "place"]}
+    result["moran_wage"] = moran_index(w, scaled["wage_real"].to_numpy())
+    return result
+
+
 def compare_edges(config, data, out):
     period = config["compare"]["period"]
     base, variants, distance, info = edge_variants(config, data, period)
     territories = data["territories"]
     regions = territories.loc[base["ids"], "region"].to_numpy()
     types = territories.loc[base["ids"], "type"].to_numpy()
+    scaled = transform(data["features"])[data["features"]["period"] == period]
     rows, labels = [], {}
     for name, w in variants.items():
         labels[name] = methods.louvain(w, 1.0)
-        rows.append({"graph": name, **describe_graph(w, labels[name], regions, types, distance)})
+        rows.append({"graph": name, **describe_graph(w, labels[name], regions, types, distance), **smoothness(w, scaled)})
     table = pd.DataFrame(rows).set_index("graph")
     table.round(3).to_csv(out / "edges.csv")
+    settings = config["network"]
+    _, lags = lagged_correlation(residual_growth(data, list(base["ids"]), period), settings["max_lag"])
+    chosen = variants[f"lagged_knn{settings['k']}"].tocoo()
+    shares = pd.Series(np.abs(lags[chosen.row, chosen.col])).value_counts(normalize=True).sort_index()
+    shares.rename_axis("lag").rename("share").round(3).to_csv(out / "edges_lags.csv")
     names = list(variants)
     pd.DataFrame([[jaccard(variants[a], variants[b]) for b in names] for a in names], index=names, columns=names).round(3).to_csv(out / "edges_jaccard.csv")
     pd.DataFrame([[adjusted_rand_score(labels[a], labels[b]) for b in names] for a in names], index=names, columns=names).round(3).to_csv(out / "edges_partition_ari.csv")
     print(f"edges: {len(base['ids'])} municipalities in {period}, detour {info['detour']:.2f}, geo scale {info['geo_scale_km']:.0f} km")
     print(table.round(3).to_string())
+    print("lagged edges by lag", shares.round(3).to_dict())
     compare_edges_over_time(config, data, out)
 
 

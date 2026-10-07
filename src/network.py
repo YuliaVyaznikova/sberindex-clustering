@@ -133,13 +133,58 @@ def threshold(similarity, mean_degree):
     return symmetric(rows, cols, similarity[rows, cols], n)
 
 
-def growth_correlation(data, ids, period, months=12):
+def monthly_logs(data, ids, period, months):
     end = period[:4] + "-" + QUARTER_END[period[4:]]
     totals = data["monthly"].pivot(index="date", columns="territory_id", values="total").sort_index()
-    totals = totals.loc[:end].tail(months + 1)[ids]
-    growth = np.log(totals).diff().iloc[1:]
-    residual = growth.sub(growth.median(axis=1), axis=0).fillna(0)
-    return np.corrcoef(residual.to_numpy().T)
+    return np.log(totals.loc[:end].tail(months)[ids])
+
+
+def residual_growth(data, ids, period, months=12):
+    growth = monthly_logs(data, ids, period, months + 1).diff().iloc[1:]
+    return growth.sub(growth.median(axis=1), axis=0).fillna(0).to_numpy()
+
+
+def residual_level(data, ids, period, months=12):
+    logs = monthly_logs(data, ids, period, months)
+    return logs.sub(logs.median(axis=1), axis=0).fillna(0).to_numpy()
+
+
+def standardize(series):
+    return (series - series.mean(axis=0)) / series.std(axis=0).clip(1e-12)
+
+
+def lagged_correlation(series, max_lag):
+    z = standardize(series)
+    t = len(z)
+    best = z.T @ z / t
+    lags = np.zeros(best.shape, dtype=int)
+    for lag in range(1, max_lag + 1):
+        ahead = z[lag:].T @ z[:-lag] / (t - lag)
+        for value, shift in [(ahead, lag), (ahead.T, -lag)]:
+            better = value > best
+            best = np.where(better, value, best)
+            lags = np.where(better, shift, lags)
+    return best, lags
+
+
+def dtw_distances(series, band):
+    z = standardize(series)
+    t, n = z.shape
+    result = np.zeros((n, n))
+    for i in range(n):
+        cost = np.full((t + 1, t + 1, n), np.inf)
+        cost[0, 0] = 0
+        for a in range(1, t + 1):
+            for b in range(max(1, a - band), min(t, a + band) + 1):
+                step = (z[a - 1, i] - z[b - 1]) ** 2
+                cost[a, b] = step + np.minimum(np.minimum(cost[a - 1, b], cost[a, b - 1]), cost[a - 1, b - 1])
+        result[i] = np.sqrt(cost[t, t])
+    return result
+
+
+def dtw_similarity(series, band):
+    d = dtw_distances(series, band)
+    return np.exp(-d / np.median(d[np.triu_indices(len(d), 1)]))
 
 
 def great_circle(territories, ids):
@@ -205,5 +250,9 @@ def edge_variants(config, data, period):
         f"hybrid_knn{k}": knn(np.clip(similarity, 0, None) * proximity(distance, settings["hybrid_scale_km"]), k),
     }
     if period >= data["monthly"]["date"].min()[:4] + "Q4":
-        variants[f"dynamics_knn{k}"] = knn(growth_correlation(data, list(base["ids"]), period), k)
+        ids = list(base["ids"])
+        growth = residual_growth(data, ids, period)
+        variants[f"dynamics_knn{k}"] = knn(np.corrcoef(growth.T), k)
+        variants[f"lagged_knn{k}"] = knn(lagged_correlation(growth, settings["max_lag"])[0], k)
+        variants[f"dtw_knn{k}"] = knn(dtw_similarity(residual_level(data, ids, period), settings["dtw_band"]), k)
     return base, variants, distance, {"detour": detour, "geo_scale_km": nearest}

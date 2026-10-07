@@ -117,6 +117,8 @@ network:
   edge_blocks: [spending]
   k: 10
   hybrid_scale_km: 300
+  max_lag: 3
+  dtw_band: 2
 
 compare:
   period: 2024Q4
